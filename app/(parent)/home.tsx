@@ -76,39 +76,41 @@ export default function ParentHomeScreen() {
     }
   };
 
-  const generateLinkingCode = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
-  };
-
   const handleGenerateCode = async (child: Child) => {
     setGeneratingCode(true);
     try {
-      const code = generateLinkingCode();
-      const expiresAt = new Date();
-      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+      const { data, error } = await supabase.rpc('generate_linking_code', {
+        child_id_param: child.id,
+      });
 
-      const { data, error } = await supabase
-        .from('children')
-        .update({
-          linking_code: code,
-          linking_code_expires_at: expiresAt.toISOString(),
-        })
-        .eq('id', child.id)
-        .select()
-        .single();
+      if (error) {
+        if (error.message.includes('Unauthorized')) {
+          Alert.alert('Error', 'You do not have permission to generate a code for this child');
+        } else if (error.message.includes('Child not found')) {
+          Alert.alert('Error', 'Child not found');
+        } else if (error.message.includes('Failed to generate unique code')) {
+          Alert.alert('Error', 'System busy, please try again');
+        } else {
+          Alert.alert('Error', 'Failed to generate code');
+        }
+        return;
+      }
 
-      if (error) throw error;
+      const updatedChild: Child = {
+        ...child,
+        linking_code: data.code,
+        linking_code_expires_at: data.expires_at,
+      };
 
-      setSelectedChild(data);
+      setChildren((prevChildren) =>
+        prevChildren.map((c) => (c.id === child.id ? updatedChild : c))
+      );
+
+      setSelectedChild(updatedChild);
       setCodeModalVisible(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating code:', error);
-      Alert.alert('Error', 'Failed to generate code');
+      Alert.alert('Error', error?.message || 'Failed to generate code');
     } finally {
       setGeneratingCode(false);
     }
