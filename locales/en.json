@@ -1,0 +1,98 @@
+{
+  "common": {
+    "app_name": "Zoomi",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "delete": "Delete",
+    "add": "Add",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "role_selection": {
+    "title": "Zoomi",
+    "subtitle": "Select Role",
+    "parent_button": "Parent",
+    "parent_subtitle": "Parent",
+    "child_button": "Child",
+    "child_subtitle": "Child"
+  },
+  "auth": {
+    "parent_login_title": "Zoomi",
+    "parent_login_subtitle": "Parent Login",
+    "parent_signup_subtitle": "Create Parent Account",
+    "email_placeholder": "Email",
+    "password_placeholder": "Password",
+    "confirm_password_placeholder": "Confirm Password",
+    "sign_in_button": "Sign In",
+    "sign_up_button": "Sign Up",
+    "toggle_to_signup": "Don't have an account? Sign Up",
+    "toggle_to_signin": "Already have an account? Sign In",
+    "errors": {
+      "fill_all_fields": "Please fill in all fields",
+      "passwords_not_match": "Passwords do not match",
+      "password_too_short": "Password must be at least 6 characters",
+      "auth_failed": "Authentication failed",
+      "unexpected_error": "An unexpected error occurred"
+    }
+  },
+  "parent_home": {
+    "title": "Zoomi",
+    "subtitle": "Parent Dashboard",
+    "children_section_title": "Children",
+    "empty_state": "No children added yet",
+    "empty_state_subtitle": "Tap the + button to add a child",
+    "device_linked": "Device Linked",
+    "link_button": "Link",
+    "add_child_modal": {
+      "title": "Add Child",
+      "name_placeholder": "Child's Name",
+      "cancel_button": "Cancel",
+      "add_button": "Add",
+      "error_empty_name": "Please enter a name",
+      "error_failed": "Failed to add child"
+    },
+    "linking_code_modal": {
+      "title": "Linking Code",
+      "instructions": "Share this code with {{childName}}. It expires in 10 minutes.",
+      "copy_success": "Code copied to clipboard",
+      "close_button": "Close"
+    },
+    "code_generation_errors": {
+      "unauthorized": "You do not have permission to generate a code for this child",
+      "child_not_found": "Child not found",
+      "system_busy": "System busy, please try again",
+      "generic_error": "Failed to generate code"
+    }
+  },
+  "child_login": {
+    "title": "Zoomi",
+    "subtitle": "Child Login",
+    "instructions": "Enter the 6-character code from your parent's device",
+    "code_placeholder": "Enter Code",
+    "connect_button": "Connect",
+    "errors": {
+      "invalid_code": "Please enter a valid 6-character code",
+      "code_invalid_or_expired": "Invalid or expired code",
+      "unexpected_error": "An unexpected error occurred"
+    }
+  },
+  "child_home": {
+    "title": "Zoomi",
+    "welcome": "Welcome, {{childName}}!",
+    "ready_workout_title": "Ready to Workout!",
+    "ready_workout_text": "Your workout programs will appear here. Stay tuned for exciting training sessions!",
+    "coming_soon_title": "Coming Soon:",
+    "coming_soon_custom_paths": "Custom workout paths",
+    "coming_soon_progress": "Progress tracking",
+    "coming_soon_badges": "Achievement badges",
+    "coming_soon_challenges": "Family challenges"
+  },
+  "language": {
+    "switch_language": "Switch Language",
+    "hebrew": "עברית",
+    "english": "English"
+  }
+}

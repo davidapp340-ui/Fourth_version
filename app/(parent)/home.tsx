@@ -9,19 +9,22 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
+  I18nManager,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/lib/database.types';
-import { Plus, LogOut, User, Link, Copy } from 'lucide-react-native';
+import { Plus, LogOut, User, Link, Copy, Globe } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
+import { useTranslation } from 'react-i18next';
 
 type Child = Database['public']['Tables']['children']['Row'];
 
 export default function ParentHomeScreen() {
   const router = useRouter();
   const { signOut, profile } = useAuth();
+  const { t, i18n } = useTranslation();
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
   const [addModalVisible, setAddModalVisible] = useState(false);
@@ -53,9 +56,15 @@ export default function ParentHomeScreen() {
     }
   };
 
+  const toggleLanguage = async () => {
+    const newLang = i18n.language === 'he' ? 'en' : 'he';
+    await i18n.changeLanguage(newLang);
+    I18nManager.forceRTL(newLang === 'he');
+  };
+
   const handleAddChild = async () => {
     if (!newChildName.trim()) {
-      Alert.alert('Error', 'Please enter a name');
+      Alert.alert(t('common.error'), t('parent_home.add_child_modal.error_empty_name'));
       return;
     }
 
@@ -72,7 +81,7 @@ export default function ParentHomeScreen() {
       loadChildren();
     } catch (error) {
       console.error('Error adding child:', error);
-      Alert.alert('Error', 'Failed to add child');
+      Alert.alert(t('common.error'), t('parent_home.add_child_modal.error_failed'));
     }
   };
 
@@ -85,13 +94,13 @@ export default function ParentHomeScreen() {
 
       if (error) {
         if (error.message.includes('Unauthorized')) {
-          Alert.alert('Error', 'You do not have permission to generate a code for this child');
+          Alert.alert(t('common.error'), t('parent_home.code_generation_errors.unauthorized'));
         } else if (error.message.includes('Child not found')) {
-          Alert.alert('Error', 'Child not found');
+          Alert.alert(t('common.error'), t('parent_home.code_generation_errors.child_not_found'));
         } else if (error.message.includes('Failed to generate unique code')) {
-          Alert.alert('Error', 'System busy, please try again');
+          Alert.alert(t('common.error'), t('parent_home.code_generation_errors.system_busy'));
         } else {
-          Alert.alert('Error', 'Failed to generate code');
+          Alert.alert(t('common.error'), t('parent_home.code_generation_errors.generic_error'));
         }
         return;
       }
@@ -110,7 +119,7 @@ export default function ParentHomeScreen() {
       setCodeModalVisible(true);
     } catch (error: any) {
       console.error('Error generating code:', error);
-      Alert.alert('Error', error?.message || 'Failed to generate code');
+      Alert.alert(t('common.error'), error?.message || t('parent_home.code_generation_errors.generic_error'));
     } finally {
       setGeneratingCode(false);
     }
@@ -118,7 +127,7 @@ export default function ParentHomeScreen() {
 
   const copyToClipboard = async (text: string) => {
     await Clipboard.setStringAsync(text);
-    Alert.alert('Success', 'Code copied to clipboard');
+    Alert.alert(t('common.success'), t('parent_home.linking_code_modal.copy_success'));
   };
 
   const handleSignOut = async () => {
@@ -133,7 +142,7 @@ export default function ParentHomeScreen() {
         <View style={styles.childDetails}>
           <Text style={styles.childName}>{item.name}</Text>
           {item.device_id && (
-            <Text style={styles.linkedText}>Device Linked</Text>
+            <Text style={styles.linkedText}>{t('parent_home.device_linked')}</Text>
           )}
         </View>
       </View>
@@ -147,7 +156,7 @@ export default function ParentHomeScreen() {
         ) : (
           <>
             <Link size={20} color="#4F46E5" />
-            <Text style={styles.linkButtonText}>Link</Text>
+            <Text style={styles.linkButtonText}>{t('parent_home.link_button')}</Text>
           </>
         )}
       </TouchableOpacity>
@@ -166,17 +175,25 @@ export default function ParentHomeScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Zoomi</Text>
-          <Text style={styles.subtitle}>Parent Dashboard</Text>
+          <Text style={styles.title}>{t('parent_home.title')}</Text>
+          <Text style={styles.subtitle}>{t('parent_home.subtitle')}</Text>
         </View>
-        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-          <LogOut size={24} color="#EF4444" />
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity style={styles.languageButton} onPress={toggleLanguage}>
+            <Globe size={22} color="#4F46E5" />
+            <Text style={styles.languageButtonText}>
+              {i18n.language === 'he' ? 'EN' : 'HE'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+            <LogOut size={24} color="#EF4444" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.content}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Children</Text>
+          <Text style={styles.sectionTitle}>{t('parent_home.children_section_title')}</Text>
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => setAddModalVisible(true)}
@@ -187,9 +204,9 @@ export default function ParentHomeScreen() {
 
         {children.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No children added yet</Text>
+            <Text style={styles.emptyText}>{t('parent_home.empty_state')}</Text>
             <Text style={styles.emptySubtext}>
-              Tap the + button to add a child
+              {t('parent_home.empty_state_subtitle')}
             </Text>
           </View>
         ) : (
@@ -210,10 +227,10 @@ export default function ParentHomeScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add Child</Text>
+            <Text style={styles.modalTitle}>{t('parent_home.add_child_modal.title')}</Text>
             <TextInput
               style={styles.modalInput}
-              placeholder="Child's Name"
+              placeholder={t('parent_home.add_child_modal.name_placeholder')}
               value={newChildName}
               onChangeText={setNewChildName}
             />
@@ -225,13 +242,13 @@ export default function ParentHomeScreen() {
                   setNewChildName('');
                 }}
               >
-                <Text style={styles.modalCancelButtonText}>Cancel</Text>
+                <Text style={styles.modalCancelButtonText}>{t('parent_home.add_child_modal.cancel_button')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalAddButton}
                 onPress={handleAddChild}
               >
-                <Text style={styles.modalAddButtonText}>Add</Text>
+                <Text style={styles.modalAddButtonText}>{t('parent_home.add_child_modal.add_button')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -246,10 +263,9 @@ export default function ParentHomeScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Linking Code</Text>
+            <Text style={styles.modalTitle}>{t('parent_home.linking_code_modal.title')}</Text>
             <Text style={styles.codeInstructions}>
-              Share this code with {selectedChild?.name}. It expires in 10
-              minutes.
+              {t('parent_home.linking_code_modal.instructions', { childName: selectedChild?.name })}
             </Text>
             <View style={styles.codeContainer}>
               <Text style={styles.code}>{selectedChild?.linking_code}</Text>
@@ -267,7 +283,7 @@ export default function ParentHomeScreen() {
                 setSelectedChild(null);
               }}
             >
-              <Text style={styles.modalCloseButtonText}>Close</Text>
+              <Text style={styles.modalCloseButtonText}>{t('parent_home.linking_code_modal.close_button')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -306,6 +322,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
     marginTop: 4,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  languageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#EEF2FF',
+  },
+  languageButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4F46E5',
   },
   signOutButton: {
     padding: 8,

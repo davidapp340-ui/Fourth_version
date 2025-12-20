@@ -1,0 +1,98 @@
+{
+  "common": {
+    "app_name": "Zoomi",
+    "cancel": "ביטול",
+    "close": "סגור",
+    "save": "שמור",
+    "delete": "מחק",
+    "add": "הוסף",
+    "edit": "ערוך",
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה"
+  },
+  "role_selection": {
+    "title": "Zoomi",
+    "subtitle": "בחר תפקיד",
+    "parent_button": "הורה",
+    "parent_subtitle": "Parent",
+    "child_button": "ילד",
+    "child_subtitle": "Child"
+  },
+  "auth": {
+    "parent_login_title": "Zoomi",
+    "parent_login_subtitle": "כניסת הורה",
+    "parent_signup_subtitle": "יצירת חשבון הורה",
+    "email_placeholder": "אימייל",
+    "password_placeholder": "סיסמה",
+    "confirm_password_placeholder": "אימות סיסמה",
+    "sign_in_button": "התחבר",
+    "sign_up_button": "הרשם",
+    "toggle_to_signup": "אין לך חשבון? הירשם",
+    "toggle_to_signin": "כבר יש לך חשבון? התחבר",
+    "errors": {
+      "fill_all_fields": "נא למלא את כל השדות",
+      "passwords_not_match": "הסיסמאות אינן תואמות",
+      "password_too_short": "הסיסמה חייבת להכיל לפחות 6 תווים",
+      "auth_failed": "האימות נכשל",
+      "unexpected_error": "אירעה שגיאה בלתי צפויה"
+    }
+  },
+  "parent_home": {
+    "title": "Zoomi",
+    "subtitle": "לוח בקרה הורים",
+    "children_section_title": "ילדים",
+    "empty_state": "עדיין לא נוספו ילדים",
+    "empty_state_subtitle": "לחץ על כפתור + להוספת ילד",
+    "device_linked": "מכשיר מקושר",
+    "link_button": "קישור",
+    "add_child_modal": {
+      "title": "הוספת ילד",
+      "name_placeholder": "שם הילד",
+      "cancel_button": "ביטול",
+      "add_button": "הוסף",
+      "error_empty_name": "נא להזין שם",
+      "error_failed": "הוספת הילד נכשלה"
+    },
+    "linking_code_modal": {
+      "title": "קוד קישור",
+      "instructions": "שתף קוד זה עם {{childName}}. הקוד יפוג בעוד 10 דקות.",
+      "copy_success": "הקוד הועתק ללוח",
+      "close_button": "סגור"
+    },
+    "code_generation_errors": {
+      "unauthorized": "אין לך הרשאה ליצור קוד לילד זה",
+      "child_not_found": "הילד לא נמצא",
+      "system_busy": "המערכת עסוקה, נסה שוב",
+      "generic_error": "יצירת הקוד נכשלה"
+    }
+  },
+  "child_login": {
+    "title": "Zoomi",
+    "subtitle": "כניסת ילד",
+    "instructions": "הזן את קוד בן 6 התווים ממכשיר ההורה",
+    "code_placeholder": "הזן קוד",
+    "connect_button": "התחבר",
+    "errors": {
+      "invalid_code": "נא להזין קוד בן 6 תווים",
+      "code_invalid_or_expired": "קוד לא חוקי או פג תוקף",
+      "unexpected_error": "אירעה שגיאה בלתי צפויה"
+    }
+  },
+  "child_home": {
+    "title": "Zoomi",
+    "welcome": "שלום, {{childName}}!",
+    "ready_workout_title": "מוכן לאימון!",
+    "ready_workout_text": "תוכניות האימון שלך יופיעו כאן. הישאר מעודכן לסשנים מרגשים!",
+    "coming_soon_title": "בקרוב:",
+    "coming_soon_custom_paths": "מסלולי אימון מותאמים אישית",
+    "coming_soon_progress": "מעקב אחר התקדמות",
+    "coming_soon_badges": "תגי הישגים",
+    "coming_soon_challenges": "אתגרים משפחתיים"
+  },
+  "language": {
+    "switch_language": "החלף שפה",
+    "hebrew": "עברית",
+    "english": "English"
+  }
+}

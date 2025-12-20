@@ -2,10 +2,12 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogOut, Activity } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 
 export default function ChildHomeScreen() {
   const router = useRouter();
   const { signOut, child } = useAuth();
+  const { t } = useTranslation();
 
   const handleSignOut = async () => {
     await signOut();
@@ -16,8 +18,8 @@ export default function ChildHomeScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Zoomi</Text>
-          <Text style={styles.subtitle}>Welcome, {child?.name}!</Text>
+          <Text style={styles.title}>{t('child_home.title')}</Text>
+          <Text style={styles.subtitle}>{t('child_home.welcome', { childName: child?.name })}</Text>
         </View>
         <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
           <LogOut size={24} color="#EF4444" />
@@ -27,19 +29,18 @@ export default function ChildHomeScreen() {
       <View style={styles.content}>
         <View style={styles.card}>
           <Activity size={64} color="#10B981" />
-          <Text style={styles.cardTitle}>Ready to Workout!</Text>
+          <Text style={styles.cardTitle}>{t('child_home.ready_workout_title')}</Text>
           <Text style={styles.cardText}>
-            Your workout programs will appear here. Stay tuned for exciting
-            training sessions!
+            {t('child_home.ready_workout_text')}
           </Text>
         </View>
 
         <View style={styles.infoSection}>
-          <Text style={styles.infoTitle}>Coming Soon:</Text>
-          <Text style={styles.infoItem}>Custom workout paths</Text>
-          <Text style={styles.infoItem}>Progress tracking</Text>
-          <Text style={styles.infoItem}>Achievement badges</Text>
-          <Text style={styles.infoItem}>Family challenges</Text>
+          <Text style={styles.infoTitle}>{t('child_home.coming_soon_title')}</Text>
+          <Text style={styles.infoItem}>{t('child_home.coming_soon_custom_paths')}</Text>
+          <Text style={styles.infoItem}>{t('child_home.coming_soon_progress')}</Text>
+          <Text style={styles.infoItem}>{t('child_home.coming_soon_badges')}</Text>
+          <Text style={styles.infoItem}>{t('child_home.coming_soon_challenges')}</Text>
         </View>
       </View>
     </View>
