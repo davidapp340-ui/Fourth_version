@@ -1,13 +1,19 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, I18nManager } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Activity } from 'lucide-react-native';
+import { LogOut, Activity, Globe } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 
 export default function ChildHomeScreen() {
   const router = useRouter();
   const { signOut, child } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const toggleLanguage = async () => {
+    const newLang = i18n.language === 'he' ? 'en' : 'he';
+    await i18n.changeLanguage(newLang);
+    I18nManager.forceRTL(newLang === 'he');
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -21,9 +27,17 @@ export default function ChildHomeScreen() {
           <Text style={styles.title}>{t('child_home.title')}</Text>
           <Text style={styles.subtitle}>{t('child_home.welcome', { childName: child?.name })}</Text>
         </View>
-        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-          <LogOut size={24} color="#EF4444" />
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity style={styles.languageButton} onPress={toggleLanguage}>
+            <Globe size={22} color="#10B981" />
+            <Text style={styles.languageButtonText}>
+              {i18n.language === 'he' ? 'EN' : 'HE'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+            <LogOut size={24} color="#EF4444" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.content}>
@@ -71,6 +85,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
     marginTop: 4,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  languageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#D1FAE5',
+  },
+  languageButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#10B981',
   },
   signOutButton: {
     padding: 8,
