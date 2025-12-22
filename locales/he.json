@@ -46,6 +46,52 @@
     "empty_state_subtitle": "לחץ על כפתור + להוספת ילד",
     "device_linked": "מכשיר מקושר",
     "link_button": "קישור",
+    "add_child_wizard": {
+      "title": "הוספת פרופיל ילד",
+      "step_indicator": "שלב {{current}} מתוך {{total}}",
+      "step1": {
+        "title": "מידע בסיסי",
+        "name_label": "שם הילד",
+        "name_placeholder": "הזן שם",
+        "birth_date_label": "תאריך לידה",
+        "birth_date_placeholder": "בחר תאריך",
+        "gender_label": "מגדר (אופציונלי)",
+        "gender_placeholder": "בחר מגדר",
+        "next_button": "המשך",
+        "validation": {
+          "name_required": "שם הוא שדה חובה",
+          "birth_date_required": "תאריך לידה הוא שדה חובה",
+          "birth_date_future": "התאריך לא יכול להיות בעתיד"
+        }
+      },
+      "step2": {
+        "title": "פרופיל ראייה והסכמה",
+        "vision_section_title": "מידע על ראייה",
+        "vision_condition_label": "מצב ראייה",
+        "vision_condition_placeholder": "בחר מצב",
+        "wears_glasses_label": "מרכיב משקפיים?",
+        "prescription_section_title": "מרשם עדכני",
+        "prescription_left_label": "עין שמאל",
+        "prescription_left_placeholder": "לדוגמה: 2.50-",
+        "prescription_right_label": "עין ימין",
+        "prescription_right_placeholder": "לדוגמה: 1.75-",
+        "consent_section_title": "הסכמת הורה",
+        "consent_text": "אני מאשר/ת שאני ההורה/האפוטרופוס החוקי ומסכים/ה ל",
+        "terms_link": "תנאי השימוש",
+        "create_button": "צור פרופיל",
+        "back_button": "חזור",
+        "validation": {
+          "consent_required": "יש לתת הסכמה כדי להמשיך",
+          "prescription_invalid": "נא להזין מספר מרשם תקין"
+        }
+      },
+      "errors": {
+        "creation_failed": "יצירת הפרופיל נכשלה. נסה שנית."
+      },
+      "success": {
+        "profile_created": "הפרופיל נוצר בהצלחה!"
+      }
+    },
     "add_child_modal": {
       "title": "הוספת ילד",
       "name_placeholder": "שם הילד",
@@ -94,5 +140,20 @@
     "switch_language": "החלף שפה",
     "hebrew": "עברית",
     "english": "English"
+  },
+  "medical": {
+    "gender": {
+      "male": "זכר",
+      "female": "נקבה",
+      "other": "אחר"
+    },
+    "vision_conditions": {
+      "myopia": "קוצר ראייה (מיופיה)",
+      "hyperopia": "רוחק ראייה (היפרמטרופיה)",
+      "amblyopia": "עין עצלה (אמבליופיה)",
+      "strabismus": "פזילה (סטרביזמוס)",
+      "other": "מצב אחר",
+      "unknown": "טרם אובחן"
+    }
   }
 }

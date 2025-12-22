@@ -6,7 +6,6 @@ import {
   StyleSheet,
   FlatList,
   Modal,
-  TextInput,
   ActivityIndicator,
   Alert,
   I18nManager,
@@ -18,6 +17,7 @@ import { Database } from '@/lib/database.types';
 import { Plus, LogOut, User, Link, Copy, Globe } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
+import AddChildWizard from '@/components/AddChildWizard';
 
 type Child = Database['public']['Tables']['children']['Row'];
 
@@ -27,9 +27,8 @@ export default function ParentHomeScreen() {
   const { t, i18n } = useTranslation();
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
-  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [wizardVisible, setWizardVisible] = useState(false);
   const [codeModalVisible, setCodeModalVisible] = useState(false);
-  const [newChildName, setNewChildName] = useState('');
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [generatingCode, setGeneratingCode] = useState(false);
 
@@ -62,27 +61,8 @@ export default function ParentHomeScreen() {
     I18nManager.forceRTL(newLang === 'he');
   };
 
-  const handleAddChild = async () => {
-    if (!newChildName.trim()) {
-      Alert.alert(t('common.error'), t('parent_home.add_child_modal.error_empty_name'));
-      return;
-    }
-
-    try {
-      const { error } = await supabase.from('children').insert({
-        family_id: profile?.family_id!,
-        name: newChildName.trim(),
-      });
-
-      if (error) throw error;
-
-      setNewChildName('');
-      setAddModalVisible(false);
-      loadChildren();
-    } catch (error) {
-      console.error('Error adding child:', error);
-      Alert.alert(t('common.error'), t('parent_home.add_child_modal.error_failed'));
-    }
+  const handleWizardSuccess = () => {
+    loadChildren();
   };
 
   const handleGenerateCode = async (child: Child) => {
@@ -196,7 +176,7 @@ export default function ParentHomeScreen() {
           <Text style={styles.sectionTitle}>{t('parent_home.children_section_title')}</Text>
           <TouchableOpacity
             style={styles.addButton}
-            onPress={() => setAddModalVisible(true)}
+            onPress={() => setWizardVisible(true)}
           >
             <Plus size={24} color="#FFFFFF" />
           </TouchableOpacity>
@@ -219,41 +199,12 @@ export default function ParentHomeScreen() {
         )}
       </View>
 
-      <Modal
-        visible={addModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setAddModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{t('parent_home.add_child_modal.title')}</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder={t('parent_home.add_child_modal.name_placeholder')}
-              value={newChildName}
-              onChangeText={setNewChildName}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.modalCancelButton}
-                onPress={() => {
-                  setAddModalVisible(false);
-                  setNewChildName('');
-                }}
-              >
-                <Text style={styles.modalCancelButtonText}>{t('parent_home.add_child_modal.cancel_button')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalAddButton}
-                onPress={handleAddChild}
-              >
-                <Text style={styles.modalAddButtonText}>{t('parent_home.add_child_modal.add_button')}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <AddChildWizard
+        visible={wizardVisible}
+        onClose={() => setWizardVisible(false)}
+        familyId={profile?.family_id!}
+        onSuccess={handleWizardSuccess}
+      />
 
       <Modal
         visible={codeModalVisible}
