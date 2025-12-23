@@ -8,13 +8,11 @@ import {
   Modal,
   ActivityIndicator,
   Alert,
-  I18nManager,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/lib/database.types';
-import { Plus, LogOut, User, Link, Copy, Globe } from 'lucide-react-native';
+import { Plus, User, Link, Copy } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import AddChildWizard from '@/components/AddChildWizard';
@@ -22,9 +20,8 @@ import AddChildWizard from '@/components/AddChildWizard';
 type Child = Database['public']['Tables']['children']['Row'];
 
 export default function ParentHomeScreen() {
-  const router = useRouter();
-  const { signOut, profile } = useAuth();
-  const { t, i18n } = useTranslation();
+  const { profile } = useAuth();
+  const { t } = useTranslation();
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
   const [wizardVisible, setWizardVisible] = useState(false);
@@ -53,12 +50,6 @@ export default function ParentHomeScreen() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const toggleLanguage = async () => {
-    const newLang = i18n.language === 'he' ? 'en' : 'he';
-    await i18n.changeLanguage(newLang);
-    I18nManager.forceRTL(newLang === 'he');
   };
 
   const handleWizardSuccess = () => {
@@ -110,11 +101,6 @@ export default function ParentHomeScreen() {
     Alert.alert(t('common.success'), t('parent_home.linking_code_modal.copy_success'));
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    router.replace('/role-selection');
-  };
-
   const renderChild = ({ item }: { item: Child }) => (
     <View style={styles.childCard}>
       <View style={styles.childInfo}>
@@ -157,17 +143,6 @@ export default function ParentHomeScreen() {
         <View>
           <Text style={styles.title}>{t('parent_home.title')}</Text>
           <Text style={styles.subtitle}>{t('parent_home.subtitle')}</Text>
-        </View>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity style={styles.languageButton} onPress={toggleLanguage}>
-            <Globe size={22} color="#4F46E5" />
-            <Text style={styles.languageButtonText}>
-              {i18n.language === 'he' ? 'EN' : 'HE'}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-            <LogOut size={24} color="#EF4444" />
-          </TouchableOpacity>
         </View>
       </View>
 
@@ -255,9 +230,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     padding: 20,
     paddingTop: 60,
     backgroundColor: '#FFFFFF',
@@ -273,27 +245,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
     marginTop: 4,
-  },
-  headerButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  languageButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#EEF2FF',
-  },
-  languageButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#4F46E5',
-  },
-  signOutButton: {
-    padding: 8,
   },
   content: {
     flex: 1,
