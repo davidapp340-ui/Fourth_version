@@ -1,18 +1,57 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, I18nManager } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, I18nManager, Alert, ActivityIndicator, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { Globe, LogOut } from 'lucide-react-native';
+import { Globe, LogOut, User, Settings as SettingsIcon, MessageCircle, Globe2, Freeze, Trash2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
+import { supabase } from '@/lib/supabase';
+import { Database } from '@/lib/database.types';
+
+type Child = Database['public']['Tables']['children']['Row'];
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { profile, signOut } = useAuth();
   const { t, i18n } = useTranslation();
+  const [children, setChildren] = useState<Child[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (profile) {
+      loadChildren();
+    }
+  }, [profile]);
+
+  const loadChildren = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('children')
+        .select('*')
+        .eq('family_id', profile?.family_id!)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setChildren(data || []);
+    } catch (error) {
+      console.error('Error loading children:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getInitials = (firstName: string, lastName: string): string => {
     const firstInitial = firstName?.charAt(0)?.toUpperCase() || '';
     const lastInitial = lastName?.charAt(0)?.toUpperCase() || '';
     return `${firstInitial}${lastInitial}`;
+  };
+
+  const getChildInitials = (name: string): string => {
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0].charAt(0).toUpperCase()}${parts[1].charAt(0).toUpperCase()}`;
+    }
+    return name.charAt(0).toUpperCase();
   };
 
   const toggleLanguage = async () => {
@@ -24,6 +63,115 @@ export default function SettingsScreen() {
   const handleSignOut = async () => {
     await signOut();
     router.replace('/role-selection');
+  };
+
+  const handleChildActions = (child: Child) => {
+    const isActive = child.subscription_status === 'active';
+
+    Alert.alert(
+      `Manage ${child.name}`,
+      'Choose an action',
+      [
+        {
+          text: isActive ? 'Freeze Subscription' : 'Activate Subscription',
+          onPress: () => handleToggleSubscription(child),
+        },
+        {
+          text: 'Delete Profile',
+          style: 'destructive',
+          onPress: () => handleDeleteConfirmation(child),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ]
+    );
+  };
+
+  const handleToggleSubscription = async (child: Child) => {
+    const newStatus = child.subscription_status === 'active' ? 'inactive' : 'active';
+    setActionLoading(child.id);
+
+    try {
+      const { error } = await supabase
+        .from('children')
+        .update({ subscription_status: newStatus })
+        .eq('id', child.id);
+
+      if (error) throw error;
+
+      setChildren(prevChildren =>
+        prevChildren.map(c =>
+          c.id === child.id ? { ...c, subscription_status: newStatus } : c
+        )
+      );
+
+      Alert.alert(
+        'Success',
+        `${child.name}'s subscription has been ${newStatus === 'active' ? 'activated' : 'frozen'}.`
+      );
+    } catch (error) {
+      console.error('Error toggling subscription:', error);
+      Alert.alert('Error', 'Failed to update subscription status. Please try again.');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDeleteConfirmation = (child: Child) => {
+    Alert.alert(
+      'Delete Profile',
+      `Are you sure you want to delete ${child.name}'s profile? This action cannot be undone.`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => handleDeleteChild(child),
+        },
+      ]
+    );
+  };
+
+  const handleDeleteChild = async (child: Child) => {
+    setActionLoading(child.id);
+
+    try {
+      const { error } = await supabase
+        .from('children')
+        .delete()
+        .eq('id', child.id);
+
+      if (error) throw error;
+
+      setChildren(prevChildren => prevChildren.filter(c => c.id !== child.id));
+      Alert.alert('Success', `${child.name}'s profile has been deleted.`);
+    } catch (error) {
+      console.error('Error deleting child:', error);
+      Alert.alert('Error', 'Failed to delete profile. Please try again.');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleWhatsAppSupport = () => {
+    const phoneNumber = '972501234567';
+    const message = 'Hi, I need help with Zoomi Fitness';
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    Linking.openURL(url).catch(() => {
+      Alert.alert('Error', 'Could not open WhatsApp. Please make sure it is installed.');
+    });
+  };
+
+  const handleVisitWebsite = () => {
+    const websiteUrl = 'https://zoomi.fitness';
+    Linking.openURL(websiteUrl).catch(() => {
+      Alert.alert('Error', 'Could not open the website.');
+    });
   };
 
   return (
@@ -46,6 +194,72 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Family Management</Text>
+
+          {loading ? (
+            <View style={styles.loadingCard}>
+              <ActivityIndicator size="large" color="#4F46E5" />
+            </View>
+          ) : children.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyText}>No children profiles yet</Text>
+              <Text style={styles.emptySubtext}>Add a child from the Home tab</Text>
+            </View>
+          ) : (
+            <View style={styles.settingCard}>
+              {children.map((child, index) => (
+                <View key={child.id}>
+                  {index > 0 && <View style={styles.divider} />}
+                  <View style={styles.childRow}>
+                    <View style={styles.childInfo}>
+                      <View style={styles.childAvatar}>
+                        <Text style={styles.childAvatarText}>
+                          {getChildInitials(child.name)}
+                        </Text>
+                      </View>
+                      <View style={styles.childDetails}>
+                        <Text style={styles.childName}>{child.name}</Text>
+                        <View style={styles.statusBadge}>
+                          <View
+                            style={[
+                              styles.statusDot,
+                              child.subscription_status === 'active'
+                                ? styles.statusDotActive
+                                : styles.statusDotInactive,
+                            ]}
+                          />
+                          <Text
+                            style={[
+                              styles.statusText,
+                              child.subscription_status === 'active'
+                                ? styles.statusTextActive
+                                : styles.statusTextInactive,
+                            ]}
+                          >
+                            {child.subscription_status === 'active' ? 'Active' : 'Frozen'}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.manageButton}
+                      onPress={() => handleChildActions(child)}
+                      disabled={actionLoading === child.id}
+                    >
+                      {actionLoading === child.id ? (
+                        <ActivityIndicator size="small" color="#4F46E5" />
+                      ) : (
+                        <SettingsIcon size={20} color="#4F46E5" />
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
+        <View style={styles.section}>
           <Text style={styles.sectionTitle}>General Settings</Text>
 
           <View style={styles.settingCard}>
@@ -65,6 +279,34 @@ export default function SettingsScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Support & Info</Text>
+
+          <View style={styles.settingCard}>
+            <TouchableOpacity style={styles.settingRow} onPress={handleWhatsAppSupport}>
+              <View style={styles.settingInfo}>
+                <MessageCircle size={24} color="#10B981" />
+                <View style={styles.settingTextContainer}>
+                  <Text style={styles.settingLabel}>WhatsApp Support</Text>
+                  <Text style={styles.settingDescription}>Get help from our team</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+
+            <TouchableOpacity style={styles.settingRow} onPress={handleVisitWebsite}>
+              <View style={styles.settingInfo}>
+                <Globe2 size={24} color="#3B82F6" />
+                <View style={styles.settingTextContainer}>
+                  <Text style={styles.settingLabel}>Visit Website</Text>
+                  <Text style={styles.settingDescription}>Learn more about Zoomi</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -181,6 +423,110 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#4F46E5',
+  },
+  loadingCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 40,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  emptyCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 32,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  emptyText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#9CA3AF',
+  },
+  childRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  childInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  childAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#10B981',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  childAvatarText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  childDetails: {
+    flex: 1,
+    gap: 4,
+  },
+  childName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  statusDotActive: {
+    backgroundColor: '#10B981',
+  },
+  statusDotInactive: {
+    backgroundColor: '#EF4444',
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  statusTextActive: {
+    color: '#10B981',
+  },
+  statusTextInactive: {
+    color: '#EF4444',
+  },
+  manageButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EEF2FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#E5E7EB',
   },
   footer: {
     padding: 20,
