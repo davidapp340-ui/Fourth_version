@@ -50,9 +50,10 @@ export default function ParentLayout() {
         }}
       />
       <Tabs.Screen
-        name="article"
+        name="article/[id]"
         options={{
           href: null,
+          tabBarStyle: { display: 'none' },
         }}
       />
     </Tabs>
