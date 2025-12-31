@@ -140,6 +140,40 @@
     "coming_soon_badges": "Achievement badges",
     "coming_soon_challenges": "Family challenges"
   },
+  "child_navigation": {
+    "tabs": {
+      "home": "Home",
+      "library": "Gallery",
+      "path": "Journey",
+      "profile": "Profile"
+    },
+    "home_screen": {
+      "title": "Home Base",
+      "placeholder": "Welcome to your Home Base"
+    },
+    "library_screen": {
+      "title": "Exercise Gallery",
+      "construction_title": "Under Construction",
+      "construction_message": "Exciting exercise content coming soon!"
+    },
+    "path_screen": {
+      "title": "My Journey",
+      "construction_title": "Under Construction",
+      "construction_message": "Track your progress here soon!"
+    }
+  },
+  "child_profile": {
+    "title": "Profile",
+    "sections": {
+      "settings": "Settings"
+    },
+    "language": {
+      "title": "Language",
+      "current_hebrew": "Hebrew",
+      "current_english": "English"
+    },
+    "sign_out": "Sign Out"
+  },
   "language": {
     "switch_language": "Switch Language",
     "hebrew": "עברית",

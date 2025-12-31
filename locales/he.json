@@ -140,6 +140,40 @@
     "coming_soon_badges": "תגי הישגים",
     "coming_soon_challenges": "אתגרים משפחתיים"
   },
+  "child_navigation": {
+    "tabs": {
+      "home": "בית",
+      "library": "גלריה",
+      "path": "מסע",
+      "profile": "פרופיל"
+    },
+    "home_screen": {
+      "title": "בסיס הבית",
+      "placeholder": "ברוכים הבאים לבסיס הבית שלך"
+    },
+    "library_screen": {
+      "title": "גלריית תרגילים",
+      "construction_title": "בבנייה",
+      "construction_message": "תוכן תרגילים מרגש בקרוב!"
+    },
+    "path_screen": {
+      "title": "המסע שלי",
+      "construction_title": "בבנייה",
+      "construction_message": "עקוב אחר ההתקדמות שלך בקרוב!"
+    }
+  },
+  "child_profile": {
+    "title": "פרופיל",
+    "sections": {
+      "settings": "הגדרות"
+    },
+    "language": {
+      "title": "שפה",
+      "current_hebrew": "עברית",
+      "current_english": "English"
+    },
+    "sign_out": "התנתק"
+  },
   "language": {
     "switch_language": "החלף שפה",
     "hebrew": "עברית",
