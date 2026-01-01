@@ -10,8 +10,8 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 // Import exercise animation components here as they're created
+import PalmingExercise from './palming_exercise';
 // import BallTrackingAnimation from './BallTrackingAnimation';
-// import PalmingAnimation from './PalmingAnimation';
 
 // Placeholder component for exercises not yet implemented
 const PlaceholderExercise: React.FC<{ animationId: string }> = ({ animationId }) => (
@@ -48,8 +48,8 @@ const styles = StyleSheet.create({
  */
 export const ExerciseRegistry: Record<string, React.ComponentType<any>> = {
   // Map animation IDs to their components
+  'palming_v1': PalmingExercise,
   // 'ball_tracking_v1': BallTrackingAnimation,
-  // 'palming_v1': PalmingAnimation,
   // Add more as they're created
 };
 
