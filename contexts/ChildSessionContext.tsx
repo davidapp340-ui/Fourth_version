@@ -14,7 +14,7 @@ interface ChildSessionContextType {
 
 const ChildSessionContext = createContext<ChildSessionContextType | undefined>(undefined);
 
-const CHILD_STORAGE_KEY = '@zoomi_child_id';
+const DEVICE_ID_KEY = '@zoomi_device_id';
 
 export function ChildSessionProvider({ children }: { children: React.ReactNode }) {
   const [child, setChild] = useState<Child | null>(null);
@@ -26,24 +26,23 @@ export function ChildSessionProvider({ children }: { children: React.ReactNode }
 
   const checkChildSession = async () => {
     try {
-      const childId = await AsyncStorage.getItem(CHILD_STORAGE_KEY);
-      if (childId) {
-        const { data, error } = await supabase
-          .from('children')
-          .select('*')
-          .eq('id', childId)
-          .maybeSingle();
+      const deviceId = await AsyncStorage.getItem(DEVICE_ID_KEY);
+      if (deviceId) {
+        const { data, error } = await supabase.rpc('get_child_session', {
+          p_device_id: deviceId,
+        });
 
         if (error) throw error;
-        if (data) {
-          setChild(data);
+
+        if (data && data.success && data.child) {
+          setChild(data.child);
         } else {
-          await AsyncStorage.removeItem(CHILD_STORAGE_KEY);
+          await AsyncStorage.removeItem(DEVICE_ID_KEY);
         }
       }
     } catch (error) {
       console.error('Error checking child session:', error);
-      await AsyncStorage.removeItem(CHILD_STORAGE_KEY);
+      await AsyncStorage.removeItem(DEVICE_ID_KEY);
     } finally {
       setLoading(false);
     }
@@ -63,7 +62,7 @@ export function ChildSessionProvider({ children }: { children: React.ReactNode }
       }
 
       const childData = data.child;
-      await AsyncStorage.setItem(CHILD_STORAGE_KEY, childData.id);
+      await AsyncStorage.setItem(DEVICE_ID_KEY, deviceId);
       setChild(childData);
 
       return { child: childData };
@@ -73,7 +72,7 @@ export function ChildSessionProvider({ children }: { children: React.ReactNode }
   };
 
   const clearChildSession = async () => {
-    await AsyncStorage.removeItem(CHILD_STORAGE_KEY);
+    await AsyncStorage.removeItem(DEVICE_ID_KEY);
     setChild(null);
   };
 
