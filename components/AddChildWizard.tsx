@@ -170,54 +170,47 @@ export default function AddChildWizard({
     setLoading(true);
 
     try {
-      const childData = {
-        family_id: familyId,
-        name: step1Data.name.trim(),
-        birth_date: step1Data.birthDate,
-        gender: step1Data.gender || null,
-        vision_condition: step2Data.visionCondition,
-        wears_glasses: step2Data.wearsGlasses,
-        current_prescription_left: step2Data.wearsGlasses && step2Data.prescriptionLeft
-          ? parseFloat(step2Data.prescriptionLeft)
-          : null,
-        current_prescription_right: step2Data.wearsGlasses && step2Data.prescriptionRight
-          ? parseFloat(step2Data.prescriptionRight)
-          : null,
-        data_consent_at: new Date().toISOString(),
-      };
+      let prescriptionLeft = null;
+      let prescriptionRight = null;
 
-      const { data: child, error: childError } = await supabase
-        .from('children')
-        .insert(childData)
-        .select()
-        .maybeSingle();
-
-      if (childError) throw childError;
-      if (!child) throw new Error('Failed to create child');
-
-      if (
-        step2Data.wearsGlasses &&
-        (step2Data.prescriptionLeft || step2Data.prescriptionRight)
-      ) {
-        const visionHistoryData = {
-          child_id: child.id,
-          recorded_at: new Date().toISOString().split('T')[0],
-          prescription_left: step2Data.prescriptionLeft
-            ? parseFloat(step2Data.prescriptionLeft)
-            : null,
-          prescription_right: step2Data.prescriptionRight
-            ? parseFloat(step2Data.prescriptionRight)
-            : null,
-          notes: 'Initial profile creation',
-        };
-
-        const { error: historyError } = await supabase
-          .from('vision_history')
-          .insert(visionHistoryData);
-
-        if (historyError) {
-          console.error('Failed to create vision history:', historyError);
+      if (step2Data.wearsGlasses) {
+        if (step2Data.prescriptionLeft) {
+          const leftVal = parseFloat(step2Data.prescriptionLeft);
+          if (isNaN(leftVal)) {
+            setError(t('parent_home.add_child_wizard.step2.validation.prescription_invalid'));
+            setLoading(false);
+            return;
+          }
+          prescriptionLeft = leftVal;
         }
+
+        if (step2Data.prescriptionRight) {
+          const rightVal = parseFloat(step2Data.prescriptionRight);
+          if (isNaN(rightVal)) {
+            setError(t('parent_home.add_child_wizard.step2.validation.prescription_invalid'));
+            setLoading(false);
+            return;
+          }
+          prescriptionRight = rightVal;
+        }
+      }
+
+      const { data, error } = await supabase.rpc('create_child_profile', {
+        p_family_id: familyId,
+        p_name: step1Data.name.trim(),
+        p_birth_date: step1Data.birthDate,
+        p_gender: step1Data.gender || null,
+        p_vision_condition: step2Data.visionCondition,
+        p_wears_glasses: step2Data.wearsGlasses,
+        p_prescription_left: prescriptionLeft,
+        p_prescription_right: prescriptionRight,
+        p_data_consent_at: new Date().toISOString(),
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error);
       }
 
       handleClose();

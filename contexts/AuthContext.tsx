@@ -141,31 +141,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const linkChildWithCode = async (code: string, deviceId: string) => {
     try {
-      const { data: childData, error: fetchError } = await supabase
-        .from('children')
-        .select('*')
-        .eq('linking_code', code)
-        .gt('linking_code_expires_at', new Date().toISOString())
-        .maybeSingle();
+      const { data, error } = await supabase.rpc('validate_and_link_child', {
+        p_linking_code: code,
+        p_device_id: deviceId,
+      });
 
-      if (fetchError) throw fetchError;
-      if (!childData) {
-        return { error: { message: 'Invalid or expired code' } };
+      if (error) throw error;
+
+      if (!data.success) {
+        return { error: { message: data.error } };
       }
 
-      const { data: updatedChild, error: updateError } = await supabase
-        .from('children')
-        .update({ device_id: deviceId })
-        .eq('id', childData.id)
-        .select()
-        .single();
+      const childData = data.child;
+      await AsyncStorage.setItem(CHILD_STORAGE_KEY, childData.id);
+      setChild(childData);
 
-      if (updateError) throw updateError;
-
-      await AsyncStorage.setItem(CHILD_STORAGE_KEY, updatedChild.id);
-      setChild(updatedChild);
-
-      return { child: updatedChild };
+      return { child: childData };
     } catch (error) {
       return { error };
     }
