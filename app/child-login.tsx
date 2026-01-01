@@ -8,14 +8,14 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
+import { useChildSession } from '@/contexts/ChildSessionContext';
 import { ArrowLeft } from 'lucide-react-native';
 import * as Device from 'expo-device';
 import { useTranslation } from 'react-i18next';
 
 export default function ChildLoginScreen() {
   const router = useRouter();
-  const { linkChildWithCode } = useAuth();
+  const { linkChildWithCode } = useChildSession();
   const { t } = useTranslation();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);

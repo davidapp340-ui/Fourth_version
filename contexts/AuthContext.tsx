@@ -1,35 +1,26 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/lib/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
-type Child = Database['public']['Tables']['children']['Row'];
 
 interface AuthContextType {
   session: Session | null;
   user: User | null;
   profile: Profile | null;
-  child: Child | null;
-  isParent: boolean;
-  isChild: boolean;
   loading: boolean;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
-  linkChildWithCode: (code: string, deviceId: string) => Promise<{ child?: Child; error?: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const CHILD_STORAGE_KEY = '@zoomi_child_id';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [child, setChild] = useState<Child | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         loadProfile(session.user.id);
       } else {
-        checkChildSession();
+        setLoading(false);
       }
     });
 
@@ -50,10 +41,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
       if (session?.user) {
         loadProfile(session.user.id);
-        setChild(null);
       } else {
         setProfile(null);
-        checkChildSession();
+        setLoading(false);
       }
     });
 
@@ -72,31 +62,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(data);
     } catch (error) {
       console.error('Error loading profile:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const checkChildSession = async () => {
-    try {
-      const childId = await AsyncStorage.getItem(CHILD_STORAGE_KEY);
-      if (childId) {
-        const { data, error } = await supabase
-          .from('children')
-          .select('*')
-          .eq('id', childId)
-          .maybeSingle();
-
-        if (error) throw error;
-        if (data) {
-          setChild(data);
-        } else {
-          await AsyncStorage.removeItem(CHILD_STORAGE_KEY);
-        }
-      }
-    } catch (error) {
-      console.error('Error checking child session:', error);
-      await AsyncStorage.removeItem(CHILD_STORAGE_KEY);
     } finally {
       setLoading(false);
     }
@@ -134,46 +99,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    await AsyncStorage.removeItem(CHILD_STORAGE_KEY);
     setProfile(null);
-    setChild(null);
-  };
-
-  const linkChildWithCode = async (code: string, deviceId: string) => {
-    try {
-      const { data, error } = await supabase.rpc('validate_and_link_child', {
-        p_linking_code: code,
-        p_device_id: deviceId,
-      });
-
-      if (error) throw error;
-
-      if (!data.success) {
-        return { error: { message: data.error } };
-      }
-
-      const childData = data.child;
-      await AsyncStorage.setItem(CHILD_STORAGE_KEY, childData.id);
-      setChild(childData);
-
-      return { child: childData };
-    } catch (error) {
-      return { error };
-    }
   };
 
   const value: AuthContextType = {
     session,
     user,
     profile,
-    child,
-    isParent: !!profile,
-    isChild: !!child,
     loading,
     signUp,
     signIn,
     signOut,
-    linkChildWithCode,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

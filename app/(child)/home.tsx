@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { useAuth } from '@/contexts/AuthContext';
+import { useChildSession } from '@/contexts/ChildSessionContext';
 import { useTranslation } from 'react-i18next';
 
 export default function ChildHomeScreen() {
-  const { child } = useAuth();
+  const { child } = useChildSession();
   const { t } = useTranslation();
 
   return (

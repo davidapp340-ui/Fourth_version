@@ -1,12 +1,12 @@
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, I18nManager } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
+import { useChildSession } from '@/contexts/ChildSessionContext';
 import { Globe, LogOut, User } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { child, signOut } = useAuth();
+  const { child, clearChildSession } = useChildSession();
   const { t, i18n } = useTranslation();
 
   const getInitials = (name: string): string => {
@@ -24,7 +24,7 @@ export default function ProfileScreen() {
   };
 
   const handleSignOut = async () => {
-    await signOut();
+    await clearChildSession();
     router.replace('/role-selection');
   };
 

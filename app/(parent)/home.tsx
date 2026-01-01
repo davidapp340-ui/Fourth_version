@@ -64,15 +64,31 @@ export default function ParentHomeScreen() {
       });
 
       if (error) {
-        if (error.message.includes('Unauthorized')) {
+        console.error('RPC error:', error);
+
+        const errorCode = error.code;
+        const errorDetails = error.details;
+        const errorHint = error.hint;
+
+        if (errorCode === 'PGRST301' || errorCode === '42501') {
           Alert.alert(t('common.error'), t('parent_home.code_generation_errors.unauthorized'));
-        } else if (error.message.includes('Child not found')) {
-          Alert.alert(t('common.error'), t('parent_home.code_generation_errors.child_not_found'));
-        } else if (error.message.includes('Failed to generate unique code')) {
-          Alert.alert(t('common.error'), t('parent_home.code_generation_errors.system_busy'));
+        } else if (errorCode === 'P0001') {
+          if (errorDetails && errorDetails.includes('not found')) {
+            Alert.alert(t('common.error'), t('parent_home.code_generation_errors.child_not_found'));
+          } else if (errorDetails && errorDetails.includes('unique code')) {
+            Alert.alert(t('common.error'), t('parent_home.code_generation_errors.system_busy'));
+          } else {
+            Alert.alert(t('common.error'), t('parent_home.code_generation_errors.generic_error'));
+          }
         } else {
           Alert.alert(t('common.error'), t('parent_home.code_generation_errors.generic_error'));
         }
+        return;
+      }
+
+      if (!data || !data.success) {
+        console.error('RPC returned unsuccessful response:', data);
+        Alert.alert(t('common.error'), t('parent_home.code_generation_errors.generic_error'));
         return;
       }
 
@@ -89,8 +105,8 @@ export default function ParentHomeScreen() {
       setSelectedChild(updatedChild);
       setCodeModalVisible(true);
     } catch (error: any) {
-      console.error('Error generating code:', error);
-      Alert.alert(t('common.error'), error?.message || t('parent_home.code_generation_errors.generic_error'));
+      console.error('Unexpected error generating code:', error);
+      Alert.alert(t('common.error'), t('parent_home.code_generation_errors.generic_error'));
     } finally {
       setGeneratingCode(false);
     }
