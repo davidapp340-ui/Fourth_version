@@ -251,5 +251,16 @@
       "whatsapp_not_installed": "Could not open WhatsApp. Please make sure it is installed.",
       "website_failed": "Could not open the website."
     }
+  },
+  "science": {
+    "title": "Science & Tips",
+    "loading": "Loading articles...",
+    "empty": "No articles available yet",
+    "error": "Failed to load articles. Please try again.",
+    "article_detail": {
+      "loading": "Loading article...",
+      "error": "Failed to load article content",
+      "back": "Back to Articles"
+    }
   }
 }

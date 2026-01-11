@@ -137,6 +137,47 @@ export interface Database {
           created_at?: string
         }
       }
+      articles: {
+        Row: {
+          id: string
+          created_at: string
+          image_url: string
+          category_he: string
+          category_en: string
+          title_he: string
+          title_en: string
+          subtitle_he: string
+          subtitle_en: string
+          content_he: string
+          content_en: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          image_url: string
+          category_he: string
+          category_en: string
+          title_he: string
+          title_en: string
+          subtitle_he: string
+          subtitle_en: string
+          content_he: string
+          content_en: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          image_url?: string
+          category_he?: string
+          category_en?: string
+          title_he?: string
+          title_en?: string
+          subtitle_he?: string
+          subtitle_en?: string
+          content_he?: string
+          content_en?: string
+        }
+      }
     }
   }
 }
