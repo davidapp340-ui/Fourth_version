@@ -178,50 +178,6 @@ export interface Database {
           content_en?: string
         }
       }
-      exercises: {
-        Row: {
-          id: string
-          animation_id: string
-          icon_id: string
-          audio_path_en: string | null
-          audio_path_he: string | null
-          title_en: string
-          title_he: string
-          description_en: string | null
-          description_he: string | null
-          status: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          animation_id: string
-          icon_id: string
-          audio_path_en?: string | null
-          audio_path_he?: string | null
-          title_en: string
-          title_he: string
-          description_en?: string | null
-          description_he?: string | null
-          status?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          animation_id?: string
-          icon_id?: string
-          audio_path_en?: string | null
-          audio_path_he?: string | null
-          title_en?: string
-          title_he?: string
-          description_en?: string | null
-          description_he?: string | null
-          status?: string
-          created_at?: string
-          updated_at?: string
-        }
-      }
     }
   }
 }
