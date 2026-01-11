@@ -6,26 +6,30 @@ import {
   StyleSheet,
   FlatList,
   Modal,
+  TextInput,
   ActivityIndicator,
   Alert,
+  I18nManager,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/lib/database.types';
-import { Plus, User, Link, Copy } from 'lucide-react-native';
+import { Plus, LogOut, User, Link, Copy, Globe } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
-import AddChildWizard from '@/components/AddChildWizard';
 
 type Child = Database['public']['Tables']['children']['Row'];
 
 export default function ParentHomeScreen() {
-  const { profile } = useAuth();
-  const { t } = useTranslation();
+  const router = useRouter();
+  const { signOut, profile } = useAuth();
+  const { t, i18n } = useTranslation();
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
-  const [wizardVisible, setWizardVisible] = useState(false);
+  const [addModalVisible, setAddModalVisible] = useState(false);
   const [codeModalVisible, setCodeModalVisible] = useState(false);
+  const [newChildName, setNewChildName] = useState('');
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [generatingCode, setGeneratingCode] = useState(false);
 
@@ -52,8 +56,33 @@ export default function ParentHomeScreen() {
     }
   };
 
-  const handleWizardSuccess = () => {
-    loadChildren();
+  const toggleLanguage = async () => {
+    const newLang = i18n.language === 'he' ? 'en' : 'he';
+    await i18n.changeLanguage(newLang);
+    I18nManager.forceRTL(newLang === 'he');
+  };
+
+  const handleAddChild = async () => {
+    if (!newChildName.trim()) {
+      Alert.alert(t('common.error'), t('parent_home.add_child_modal.error_empty_name'));
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('children').insert({
+        family_id: profile?.family_id!,
+        name: newChildName.trim(),
+      });
+
+      if (error) throw error;
+
+      setNewChildName('');
+      setAddModalVisible(false);
+      loadChildren();
+    } catch (error) {
+      console.error('Error adding child:', error);
+      Alert.alert(t('common.error'), t('parent_home.add_child_modal.error_failed'));
+    }
   };
 
   const handleGenerateCode = async (child: Child) => {
@@ -64,31 +93,15 @@ export default function ParentHomeScreen() {
       });
 
       if (error) {
-        console.error('RPC error:', error);
-
-        const errorCode = error.code;
-        const errorDetails = error.details;
-        const errorHint = error.hint;
-
-        if (errorCode === 'PGRST301' || errorCode === '42501') {
+        if (error.message.includes('Unauthorized')) {
           Alert.alert(t('common.error'), t('parent_home.code_generation_errors.unauthorized'));
-        } else if (errorCode === 'P0001') {
-          if (errorDetails && errorDetails.includes('not found')) {
-            Alert.alert(t('common.error'), t('parent_home.code_generation_errors.child_not_found'));
-          } else if (errorDetails && errorDetails.includes('unique code')) {
-            Alert.alert(t('common.error'), t('parent_home.code_generation_errors.system_busy'));
-          } else {
-            Alert.alert(t('common.error'), t('parent_home.code_generation_errors.generic_error'));
-          }
+        } else if (error.message.includes('Child not found')) {
+          Alert.alert(t('common.error'), t('parent_home.code_generation_errors.child_not_found'));
+        } else if (error.message.includes('Failed to generate unique code')) {
+          Alert.alert(t('common.error'), t('parent_home.code_generation_errors.system_busy'));
         } else {
           Alert.alert(t('common.error'), t('parent_home.code_generation_errors.generic_error'));
         }
-        return;
-      }
-
-      if (!data || !data.success) {
-        console.error('RPC returned unsuccessful response:', data);
-        Alert.alert(t('common.error'), t('parent_home.code_generation_errors.generic_error'));
         return;
       }
 
@@ -105,8 +118,8 @@ export default function ParentHomeScreen() {
       setSelectedChild(updatedChild);
       setCodeModalVisible(true);
     } catch (error: any) {
-      console.error('Unexpected error generating code:', error);
-      Alert.alert(t('common.error'), t('parent_home.code_generation_errors.generic_error'));
+      console.error('Error generating code:', error);
+      Alert.alert(t('common.error'), error?.message || t('parent_home.code_generation_errors.generic_error'));
     } finally {
       setGeneratingCode(false);
     }
@@ -115,6 +128,11 @@ export default function ParentHomeScreen() {
   const copyToClipboard = async (text: string) => {
     await Clipboard.setStringAsync(text);
     Alert.alert(t('common.success'), t('parent_home.linking_code_modal.copy_success'));
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace('/role-selection');
   };
 
   const renderChild = ({ item }: { item: Child }) => (
@@ -160,6 +178,17 @@ export default function ParentHomeScreen() {
           <Text style={styles.title}>{t('parent_home.title')}</Text>
           <Text style={styles.subtitle}>{t('parent_home.subtitle')}</Text>
         </View>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity style={styles.languageButton} onPress={toggleLanguage}>
+            <Globe size={22} color="#4F46E5" />
+            <Text style={styles.languageButtonText}>
+              {i18n.language === 'he' ? 'EN' : 'HE'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+            <LogOut size={24} color="#EF4444" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.content}>
@@ -167,7 +196,7 @@ export default function ParentHomeScreen() {
           <Text style={styles.sectionTitle}>{t('parent_home.children_section_title')}</Text>
           <TouchableOpacity
             style={styles.addButton}
-            onPress={() => setWizardVisible(true)}
+            onPress={() => setAddModalVisible(true)}
           >
             <Plus size={24} color="#FFFFFF" />
           </TouchableOpacity>
@@ -190,12 +219,41 @@ export default function ParentHomeScreen() {
         )}
       </View>
 
-      <AddChildWizard
-        visible={wizardVisible}
-        onClose={() => setWizardVisible(false)}
-        familyId={profile?.family_id!}
-        onSuccess={handleWizardSuccess}
-      />
+      <Modal
+        visible={addModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setAddModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{t('parent_home.add_child_modal.title')}</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder={t('parent_home.add_child_modal.name_placeholder')}
+              value={newChildName}
+              onChangeText={setNewChildName}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => {
+                  setAddModalVisible(false);
+                  setNewChildName('');
+                }}
+              >
+                <Text style={styles.modalCancelButtonText}>{t('parent_home.add_child_modal.cancel_button')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalAddButton}
+                onPress={handleAddChild}
+              >
+                <Text style={styles.modalAddButtonText}>{t('parent_home.add_child_modal.add_button')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         visible={codeModalVisible}
@@ -246,6 +304,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 20,
     paddingTop: 60,
     backgroundColor: '#FFFFFF',
@@ -261,6 +322,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
     marginTop: 4,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  languageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#EEF2FF',
+  },
+  languageButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4F46E5',
+  },
+  signOutButton: {
+    padding: 8,
   },
   content: {
     flex: 1,

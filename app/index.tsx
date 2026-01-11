@@ -2,16 +2,10 @@ import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { useChildSession } from '@/contexts/ChildSessionContext';
 
 export default function SplashScreen() {
   const router = useRouter();
-  const { loading: authLoading, profile } = useAuth();
-  const { loading: childLoading, child } = useChildSession();
-
-  const loading = authLoading || childLoading;
-  const isParent = !!profile;
-  const isChild = !!child;
+  const { loading, isParent, isChild } = useAuth();
 
   useEffect(() => {
     if (!loading) {

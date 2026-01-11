@@ -20,8 +20,6 @@ export default function ParentAuthScreen() {
   const { signIn, signUp } = useAuth();
   const { t } = useTranslation();
   const [isSignUp, setIsSignUp] = useState(false);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -30,11 +28,6 @@ export default function ParentAuthScreen() {
 
   const handleSubmit = async () => {
     setError('');
-
-    if (isSignUp && (!firstName.trim() || !lastName.trim())) {
-      setError(t('auth.errors.fill_all_fields'));
-      return;
-    }
 
     if (!email || !password) {
       setError(t('auth.errors.fill_all_fields'));
@@ -55,7 +48,7 @@ export default function ParentAuthScreen() {
 
     try {
       const { error: authError } = isSignUp
-        ? await signUp(email, password, firstName.trim(), lastName.trim())
+        ? await signUp(email, password)
         : await signIn(email, password);
 
       if (authError) {
@@ -92,28 +85,6 @@ export default function ParentAuthScreen() {
 
         <View style={styles.form}>
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
-          {isSignUp && (
-            <>
-              <TextInput
-                style={styles.input}
-                placeholder={t('auth.first_name_placeholder')}
-                value={firstName}
-                onChangeText={setFirstName}
-                autoCapitalize="words"
-                editable={!loading}
-              />
-
-              <TextInput
-                style={styles.input}
-                placeholder={t('auth.last_name_placeholder')}
-                value={lastName}
-                onChangeText={setLastName}
-                autoCapitalize="words"
-                editable={!loading}
-              />
-            </>
-          )}
 
           <TextInput
             style={styles.input}
@@ -164,9 +135,6 @@ export default function ParentAuthScreen() {
             onPress={() => {
               setIsSignUp(!isSignUp);
               setError('');
-              setFirstName('');
-              setLastName('');
-              setConfirmPassword('');
             }}
             disabled={loading}
           >
