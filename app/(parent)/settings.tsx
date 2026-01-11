@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, I18nManager, Alert, ActivityIndicator, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { Globe, LogOut, Settings as SettingsIcon, MessageCircle, Globe2, FileAudio } from 'lucide-react-native';
+import { Globe, LogOut, Settings as SettingsIcon, MessageCircle, Globe2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/lib/database.types';
@@ -193,10 +193,6 @@ export default function SettingsScreen() {
     });
   };
 
-  const handleAudioManager = () => {
-    router.push('/(parent)/audio-manager');
-  };
-
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -306,22 +302,6 @@ export default function SettingsScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Content Management</Text>
-
-          <View style={styles.settingCard}>
-            <TouchableOpacity style={styles.settingRow} onPress={handleAudioManager}>
-              <View style={styles.settingInfo}>
-                <FileAudio size={24} color="#10B981" />
-                <View style={styles.settingTextContainer}>
-                  <Text style={styles.settingLabel}>Audio Manager</Text>
-                  <Text style={styles.settingDescription}>Upload and manage exercise audio files</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
           </View>
         </View>
 
