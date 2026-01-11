@@ -34,6 +34,7 @@ export interface Database {
           email: string
           created_at: string
           first_name: string | null
+          last_name: string | null
         }
         Insert: {
           id: string
@@ -42,6 +43,7 @@ export interface Database {
           email: string
           created_at?: string
           first_name?: string | null
+          last_name?: string | null
         }
         Update: {
           id?: string
@@ -50,6 +52,7 @@ export interface Database {
           email?: string
           created_at?: string
           first_name?: string | null
+          last_name?: string | null
         }
       }
       children: {
@@ -68,6 +71,7 @@ export interface Database {
           current_prescription_left: number | null
           current_prescription_right: number | null
           data_consent_at: string | null
+          subscription_status: string
         }
         Insert: {
           id?: string
@@ -84,6 +88,7 @@ export interface Database {
           current_prescription_left?: number | null
           current_prescription_right?: number | null
           data_consent_at?: string | null
+          subscription_status?: string
         }
         Update: {
           id?: string
@@ -100,6 +105,7 @@ export interface Database {
           current_prescription_left?: number | null
           current_prescription_right?: number | null
           data_consent_at?: string | null
+          subscription_status?: string
         }
       }
       vision_history: {
