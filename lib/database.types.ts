@@ -9,104 +9,75 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      exercises: {
+      families: {
         Row: {
           id: string
-          animation_id: string
-          icon_id: string
-          audio_path_en: string | null
-          audio_path_he: string | null
-          title_en: string
-          title_he: string
-          description_en: string | null
-          description_he: string | null
-          status: string
           created_at: string
-          updated_at: string
+          name: string
         }
         Insert: {
           id?: string
-          animation_id: string
-          icon_id: string
-          audio_path_en?: string | null
-          audio_path_he?: string | null
-          title_en: string
-          title_he: string
-          description_en?: string | null
-          description_he?: string | null
-          status?: string
           created_at?: string
-          updated_at?: string
+          name?: string
         }
         Update: {
           id?: string
-          animation_id?: string
-          icon_id?: string
-          audio_path_en?: string | null
-          audio_path_he?: string | null
-          title_en?: string
-          title_he?: string
-          description_en?: string | null
-          description_he?: string | null
-          status?: string
           created_at?: string
-          updated_at?: string
+          name?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "library_items_exercise_id_fkey"
-            columns: ["id"]
-            referencedRelation: "library_items"
-            referencedColumns: ["exercise_id"]
-          }
-        ]
       }
-      library_items: {
+      profiles: {
         Row: {
           id: string
-          exercise_id: string
-          category_name: string
-          category_color: string
-          enable_audio: boolean
-          enable_animation: boolean
-          sort_order: number
+          family_id: string | null
+          role: string
+          email: string
           created_at: string
-          updated_at: string
         }
         Insert: {
-          id?: string
-          exercise_id: string
-          category_name: string
-          category_color?: string
-          enable_audio?: boolean
-          enable_animation?: boolean
-          sort_order?: number
+          id: string
+          family_id?: string | null
+          role?: string
+          email: string
           created_at?: string
-          updated_at?: string
         }
         Update: {
           id?: string
-          exercise_id?: string
-          category_name?: string
-          category_color?: string
-          enable_audio?: boolean
-          enable_animation?: boolean
-          sort_order?: number
+          family_id?: string | null
+          role?: string
+          email?: string
           created_at?: string
-          updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "library_items_exercise_id_fkey"
-            columns: ["exercise_id"]
-            referencedRelation: "exercises"
-            referencedColumns: ["id"]
-          }
-        ]
+      }
+      children: {
+        Row: {
+          id: string
+          family_id: string
+          name: string
+          linking_code: string | null
+          linking_code_expires_at: string | null
+          device_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          family_id: string
+          name: string
+          linking_code?: string | null
+          linking_code_expires_at?: string | null
+          device_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          family_id?: string
+          name?: string
+          linking_code?: string | null
+          linking_code_expires_at?: string | null
+          device_id?: string | null
+          created_at?: string
+        }
       }
     }
-    Views: {}
-    Functions: {}
-    Enums: {}
   }
 }

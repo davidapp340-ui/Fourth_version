@@ -13,15 +13,11 @@ import {
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { ArrowLeft } from 'lucide-react-native';
-import { useTranslation } from 'react-i18next';
 
 export default function ParentAuthScreen() {
   const router = useRouter();
   const { signIn, signUp } = useAuth();
-  const { t } = useTranslation();
   const [isSignUp, setIsSignUp] = useState(false);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -31,23 +27,18 @@ export default function ParentAuthScreen() {
   const handleSubmit = async () => {
     setError('');
 
-    if (isSignUp && (!firstName.trim() || !lastName.trim())) {
-      setError(t('auth.errors.fill_all_fields'));
-      return;
-    }
-
     if (!email || !password) {
-      setError(t('auth.errors.fill_all_fields'));
+      setError('Please fill in all fields');
       return;
     }
 
     if (isSignUp && password !== confirmPassword) {
-      setError(t('auth.errors.passwords_not_match'));
+      setError('Passwords do not match');
       return;
     }
 
     if (password.length < 6) {
-      setError(t('auth.errors.password_too_short'));
+      setError('Password must be at least 6 characters');
       return;
     }
 
@@ -55,16 +46,16 @@ export default function ParentAuthScreen() {
 
     try {
       const { error: authError } = isSignUp
-        ? await signUp(email, password, firstName.trim(), lastName.trim())
+        ? await signUp(email, password)
         : await signIn(email, password);
 
       if (authError) {
-        setError(authError.message || t('auth.errors.auth_failed'));
+        setError(authError.message || 'Authentication failed');
       } else {
         router.replace('/(parent)/home');
       }
     } catch (err) {
-      setError(t('auth.errors.unexpected_error'));
+      setError('An unexpected error occurred');
     } finally {
       setLoading(false);
     }
@@ -84,40 +75,18 @@ export default function ParentAuthScreen() {
         </TouchableOpacity>
 
         <View style={styles.header}>
-          <Text style={styles.title}>{t('auth.parent_login_title')}</Text>
+          <Text style={styles.title}>Zoomi</Text>
           <Text style={styles.subtitle}>
-            {isSignUp ? t('auth.parent_signup_subtitle') : t('auth.parent_login_subtitle')}
+            {isSignUp ? 'Create Parent Account' : 'Parent Login'}
           </Text>
         </View>
 
         <View style={styles.form}>
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-          {isSignUp && (
-            <>
-              <TextInput
-                style={styles.input}
-                placeholder={t('auth.first_name_placeholder')}
-                value={firstName}
-                onChangeText={setFirstName}
-                autoCapitalize="words"
-                editable={!loading}
-              />
-
-              <TextInput
-                style={styles.input}
-                placeholder={t('auth.last_name_placeholder')}
-                value={lastName}
-                onChangeText={setLastName}
-                autoCapitalize="words"
-                editable={!loading}
-              />
-            </>
-          )}
-
           <TextInput
             style={styles.input}
-            placeholder={t('auth.email_placeholder')}
+            placeholder="Email"
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -127,7 +96,7 @@ export default function ParentAuthScreen() {
 
           <TextInput
             style={styles.input}
-            placeholder={t('auth.password_placeholder')}
+            placeholder="Password"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -137,7 +106,7 @@ export default function ParentAuthScreen() {
           {isSignUp && (
             <TextInput
               style={styles.input}
-              placeholder={t('auth.confirm_password_placeholder')}
+              placeholder="Confirm Password"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry
@@ -154,7 +123,7 @@ export default function ParentAuthScreen() {
               <ActivityIndicator color="#FFFFFF" />
             ) : (
               <Text style={styles.submitButtonText}>
-                {isSignUp ? t('auth.sign_up_button') : t('auth.sign_in_button')}
+                {isSignUp ? 'Sign Up' : 'Sign In'}
               </Text>
             )}
           </TouchableOpacity>
@@ -164,14 +133,13 @@ export default function ParentAuthScreen() {
             onPress={() => {
               setIsSignUp(!isSignUp);
               setError('');
-              setFirstName('');
-              setLastName('');
-              setConfirmPassword('');
             }}
             disabled={loading}
           >
             <Text style={styles.toggleButtonText}>
-              {isSignUp ? t('auth.toggle_to_signin') : t('auth.toggle_to_signup')}
+              {isSignUp
+                ? 'Already have an account? Sign In'
+                : "Don't have an account? Sign Up"}
             </Text>
           </TouchableOpacity>
         </View>

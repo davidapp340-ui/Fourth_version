@@ -1,16 +1,14 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Users, Baby } from 'lucide-react-native';
-import { useTranslation } from 'react-i18next';
 
 export default function RoleSelectionScreen() {
   const router = useRouter();
-  const { t } = useTranslation();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{t('role_selection.title')}</Text>
-      <Text style={styles.subtitle}>{t('role_selection.subtitle')}</Text>
+      <Text style={styles.title}>Zoomi</Text>
+      <Text style={styles.subtitle}>בחר תפקיד</Text>
 
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
@@ -18,8 +16,8 @@ export default function RoleSelectionScreen() {
           onPress={() => router.push('/parent-auth')}
         >
           <Users size={48} color="#FFFFFF" />
-          <Text style={styles.buttonText}>{t('role_selection.parent_button')}</Text>
-          <Text style={styles.buttonSubtext}>{t('role_selection.parent_subtitle')}</Text>
+          <Text style={styles.buttonText}>הורה</Text>
+          <Text style={styles.buttonSubtext}>Parent</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -27,8 +25,8 @@ export default function RoleSelectionScreen() {
           onPress={() => router.push('/child-login')}
         >
           <Baby size={48} color="#FFFFFF" />
-          <Text style={styles.buttonText}>{t('role_selection.child_button')}</Text>
-          <Text style={styles.buttonSubtext}>{t('role_selection.child_subtitle')}</Text>
+          <Text style={styles.buttonText}>ילד</Text>
+          <Text style={styles.buttonSubtext}>Child</Text>
         </TouchableOpacity>
       </View>
     </View>
