@@ -33,6 +33,7 @@ export interface Database {
           role: string
           email: string
           created_at: string
+          first_name: string | null
         }
         Insert: {
           id: string
@@ -40,6 +41,7 @@ export interface Database {
           role?: string
           email: string
           created_at?: string
+          first_name?: string | null
         }
         Update: {
           id?: string
@@ -47,6 +49,7 @@ export interface Database {
           role?: string
           email?: string
           created_at?: string
+          first_name?: string | null
         }
       }
       children: {

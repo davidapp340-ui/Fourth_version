@@ -10,7 +10,8 @@ import {
   Switch,
   Platform,
 } from 'react-native';
-import { X } from 'lucide-react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { X, Calendar } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabase';
 
@@ -45,6 +46,7 @@ export default function AddChildWizard({
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [step1Data, setStep1Data] = useState<Step1Data>({
     name: '',
@@ -105,6 +107,27 @@ export default function AddChildWizard({
   const handleBack = () => {
     setError('');
     setCurrentStep(1);
+  };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
+
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0];
+      setStep1Data({ ...step1Data, birthDate: formattedDate });
+    }
+  };
+
+  const formatDateForDisplay = (dateString: string): string => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   const validateStep2 = (): boolean => {
@@ -295,14 +318,35 @@ export default function AddChildWizard({
         <Text style={styles.label}>
           {t('parent_home.add_child_wizard.step1.birth_date_label')}
         </Text>
-        <TextInput
-          style={styles.input}
-          value={step1Data.birthDate}
-          onChangeText={(text) => setStep1Data({ ...step1Data, birthDate: text })}
-          placeholder={t('parent_home.add_child_wizard.step1.birth_date_placeholder')}
-          placeholderTextColor="#9CA3AF"
-        />
-        <Text style={styles.helperText}>Format: YYYY-MM-DD</Text>
+        <TouchableOpacity
+          style={styles.datePickerButton}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Text style={step1Data.birthDate ? styles.dateText : styles.datePlaceholder}>
+            {step1Data.birthDate
+              ? formatDateForDisplay(step1Data.birthDate)
+              : t('parent_home.add_child_wizard.step1.birth_date_placeholder')}
+          </Text>
+          <Calendar size={20} color="#6B7280" />
+        </TouchableOpacity>
+        {showDatePicker && (
+          <DateTimePicker
+            value={step1Data.birthDate ? new Date(step1Data.birthDate) : new Date()}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={handleDateChange}
+            maximumDate={new Date()}
+            minimumDate={new Date(1900, 0, 1)}
+          />
+        )}
+        {Platform.OS === 'ios' && showDatePicker && (
+          <TouchableOpacity
+            style={styles.datePickerDoneButton}
+            onPress={() => setShowDatePicker(false)}
+          >
+            <Text style={styles.datePickerDoneText}>{t('common.done') || 'Done'}</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.fieldGroup}>
@@ -650,5 +694,35 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: '#D1D5DB',
+  },
+  datePickerButton: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    padding: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dateText: {
+    fontSize: 16,
+    color: '#111827',
+  },
+  datePlaceholder: {
+    fontSize: 16,
+    color: '#9CA3AF',
+  },
+  datePickerDoneButton: {
+    backgroundColor: '#6366F1',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  datePickerDoneText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
