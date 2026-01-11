@@ -8,13 +8,15 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
+import { useChildSession } from '@/contexts/ChildSessionContext';
 import { ArrowLeft } from 'lucide-react-native';
 import * as Device from 'expo-device';
+import { useTranslation } from 'react-i18next';
 
 export default function ChildLoginScreen() {
   const router = useRouter();
-  const { linkChildWithCode } = useAuth();
+  const { linkChildWithCode } = useChildSession();
+  const { t } = useTranslation();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -23,7 +25,7 @@ export default function ChildLoginScreen() {
     setError('');
 
     if (!code || code.length !== 6) {
-      setError('Please enter a valid 6-character code');
+      setError(t('child_login.errors.invalid_code'));
       return;
     }
 
@@ -37,12 +39,12 @@ export default function ChildLoginScreen() {
       );
 
       if (linkError) {
-        setError(linkError.message || 'Invalid or expired code');
+        setError(linkError.message || t('child_login.errors.code_invalid_or_expired'));
       } else if (child) {
         router.replace('/(child)/home');
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError(t('child_login.errors.unexpected_error'));
     } finally {
       setLoading(false);
     }
@@ -55,17 +57,17 @@ export default function ChildLoginScreen() {
       </TouchableOpacity>
 
       <View style={styles.content}>
-        <Text style={styles.title}>Zoomi</Text>
-        <Text style={styles.subtitle}>Child Login</Text>
+        <Text style={styles.title}>{t('child_login.title')}</Text>
+        <Text style={styles.subtitle}>{t('child_login.subtitle')}</Text>
         <Text style={styles.instructions}>
-          Enter the 6-character code from your parent's device
+          {t('child_login.instructions')}
         </Text>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <TextInput
           style={styles.input}
-          placeholder="Enter Code"
+          placeholder={t('child_login.code_placeholder')}
           value={code}
           onChangeText={(text) => setCode(text.toUpperCase())}
           autoCapitalize="characters"
@@ -81,7 +83,7 @@ export default function ChildLoginScreen() {
           {loading ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.connectButtonText}>Connect</Text>
+            <Text style={styles.connectButtonText}>{t('child_login.connect_button')}</Text>
           )}
         </TouchableOpacity>
       </View>

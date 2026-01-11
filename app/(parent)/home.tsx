@@ -6,27 +6,26 @@ import {
   StyleSheet,
   FlatList,
   Modal,
-  TextInput,
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/lib/database.types';
-import { Plus, LogOut, User, Link, Copy } from 'lucide-react-native';
+import { Plus, User, Link, Copy } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
+import { useTranslation } from 'react-i18next';
+import AddChildWizard from '@/components/AddChildWizard';
 
 type Child = Database['public']['Tables']['children']['Row'];
 
 export default function ParentHomeScreen() {
-  const router = useRouter();
-  const { signOut, profile } = useAuth();
+  const { profile } = useAuth();
+  const { t } = useTranslation();
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
-  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [wizardVisible, setWizardVisible] = useState(false);
   const [codeModalVisible, setCodeModalVisible] = useState(false);
-  const [newChildName, setNewChildName] = useState('');
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [generatingCode, setGeneratingCode] = useState(false);
 
@@ -53,62 +52,61 @@ export default function ParentHomeScreen() {
     }
   };
 
-  const handleAddChild = async () => {
-    if (!newChildName.trim()) {
-      Alert.alert('Error', 'Please enter a name');
-      return;
-    }
-
-    try {
-      const { error } = await supabase.from('children').insert({
-        family_id: profile?.family_id!,
-        name: newChildName.trim(),
-      });
-
-      if (error) throw error;
-
-      setNewChildName('');
-      setAddModalVisible(false);
-      loadChildren();
-    } catch (error) {
-      console.error('Error adding child:', error);
-      Alert.alert('Error', 'Failed to add child');
-    }
-  };
-
-  const generateLinkingCode = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
+  const handleWizardSuccess = () => {
+    loadChildren();
   };
 
   const handleGenerateCode = async (child: Child) => {
     setGeneratingCode(true);
     try {
-      const code = generateLinkingCode();
-      const expiresAt = new Date();
-      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+      const { data, error } = await supabase.rpc('generate_linking_code', {
+        child_id_param: child.id,
+      });
 
-      const { data, error } = await supabase
-        .from('children')
-        .update({
-          linking_code: code,
-          linking_code_expires_at: expiresAt.toISOString(),
-        })
-        .eq('id', child.id)
-        .select()
-        .single();
+      if (error) {
+        console.error('RPC error:', error);
 
-      if (error) throw error;
+        const errorCode = error.code;
+        const errorDetails = error.details;
+        const errorHint = error.hint;
 
-      setSelectedChild(data);
+        if (errorCode === 'PGRST301' || errorCode === '42501') {
+          Alert.alert(t('common.error'), t('parent_home.code_generation_errors.unauthorized'));
+        } else if (errorCode === 'P0001') {
+          if (errorDetails && errorDetails.includes('not found')) {
+            Alert.alert(t('common.error'), t('parent_home.code_generation_errors.child_not_found'));
+          } else if (errorDetails && errorDetails.includes('unique code')) {
+            Alert.alert(t('common.error'), t('parent_home.code_generation_errors.system_busy'));
+          } else {
+            Alert.alert(t('common.error'), t('parent_home.code_generation_errors.generic_error'));
+          }
+        } else {
+          Alert.alert(t('common.error'), t('parent_home.code_generation_errors.generic_error'));
+        }
+        return;
+      }
+
+      if (!data || !data.success) {
+        console.error('RPC returned unsuccessful response:', data);
+        Alert.alert(t('common.error'), t('parent_home.code_generation_errors.generic_error'));
+        return;
+      }
+
+      const updatedChild: Child = {
+        ...child,
+        linking_code: data.code,
+        linking_code_expires_at: data.expires_at,
+      };
+
+      setChildren((prevChildren) =>
+        prevChildren.map((c) => (c.id === child.id ? updatedChild : c))
+      );
+
+      setSelectedChild(updatedChild);
       setCodeModalVisible(true);
-    } catch (error) {
-      console.error('Error generating code:', error);
-      Alert.alert('Error', 'Failed to generate code');
+    } catch (error: any) {
+      console.error('Unexpected error generating code:', error);
+      Alert.alert(t('common.error'), t('parent_home.code_generation_errors.generic_error'));
     } finally {
       setGeneratingCode(false);
     }
@@ -116,12 +114,7 @@ export default function ParentHomeScreen() {
 
   const copyToClipboard = async (text: string) => {
     await Clipboard.setStringAsync(text);
-    Alert.alert('Success', 'Code copied to clipboard');
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.replace('/role-selection');
+    Alert.alert(t('common.success'), t('parent_home.linking_code_modal.copy_success'));
   };
 
   const renderChild = ({ item }: { item: Child }) => (
@@ -131,7 +124,7 @@ export default function ParentHomeScreen() {
         <View style={styles.childDetails}>
           <Text style={styles.childName}>{item.name}</Text>
           {item.device_id && (
-            <Text style={styles.linkedText}>Device Linked</Text>
+            <Text style={styles.linkedText}>{t('parent_home.device_linked')}</Text>
           )}
         </View>
       </View>
@@ -145,7 +138,7 @@ export default function ParentHomeScreen() {
         ) : (
           <>
             <Link size={20} color="#4F46E5" />
-            <Text style={styles.linkButtonText}>Link</Text>
+            <Text style={styles.linkButtonText}>{t('parent_home.link_button')}</Text>
           </>
         )}
       </TouchableOpacity>
@@ -164,20 +157,17 @@ export default function ParentHomeScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Zoomi</Text>
-          <Text style={styles.subtitle}>Parent Dashboard</Text>
+          <Text style={styles.title}>{t('parent_home.title')}</Text>
+          <Text style={styles.subtitle}>{t('parent_home.subtitle')}</Text>
         </View>
-        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-          <LogOut size={24} color="#EF4444" />
-        </TouchableOpacity>
       </View>
 
       <View style={styles.content}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Children</Text>
+          <Text style={styles.sectionTitle}>{t('parent_home.children_section_title')}</Text>
           <TouchableOpacity
             style={styles.addButton}
-            onPress={() => setAddModalVisible(true)}
+            onPress={() => setWizardVisible(true)}
           >
             <Plus size={24} color="#FFFFFF" />
           </TouchableOpacity>
@@ -185,9 +175,9 @@ export default function ParentHomeScreen() {
 
         {children.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No children added yet</Text>
+            <Text style={styles.emptyText}>{t('parent_home.empty_state')}</Text>
             <Text style={styles.emptySubtext}>
-              Tap the + button to add a child
+              {t('parent_home.empty_state_subtitle')}
             </Text>
           </View>
         ) : (
@@ -200,41 +190,12 @@ export default function ParentHomeScreen() {
         )}
       </View>
 
-      <Modal
-        visible={addModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setAddModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add Child</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Child's Name"
-              value={newChildName}
-              onChangeText={setNewChildName}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.modalCancelButton}
-                onPress={() => {
-                  setAddModalVisible(false);
-                  setNewChildName('');
-                }}
-              >
-                <Text style={styles.modalCancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalAddButton}
-                onPress={handleAddChild}
-              >
-                <Text style={styles.modalAddButtonText}>Add</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <AddChildWizard
+        visible={wizardVisible}
+        onClose={() => setWizardVisible(false)}
+        familyId={profile?.family_id!}
+        onSuccess={handleWizardSuccess}
+      />
 
       <Modal
         visible={codeModalVisible}
@@ -244,10 +205,9 @@ export default function ParentHomeScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Linking Code</Text>
+            <Text style={styles.modalTitle}>{t('parent_home.linking_code_modal.title')}</Text>
             <Text style={styles.codeInstructions}>
-              Share this code with {selectedChild?.name}. It expires in 10
-              minutes.
+              {t('parent_home.linking_code_modal.instructions', { childName: selectedChild?.name })}
             </Text>
             <View style={styles.codeContainer}>
               <Text style={styles.code}>{selectedChild?.linking_code}</Text>
@@ -265,7 +225,7 @@ export default function ParentHomeScreen() {
                 setSelectedChild(null);
               }}
             >
-              <Text style={styles.modalCloseButtonText}>Close</Text>
+              <Text style={styles.modalCloseButtonText}>{t('parent_home.linking_code_modal.close_button')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -286,9 +246,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     padding: 20,
     paddingTop: 60,
     backgroundColor: '#FFFFFF',
@@ -304,9 +261,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
     marginTop: 4,
-  },
-  signOutButton: {
-    padding: 8,
   },
   content: {
     flex: 1,
