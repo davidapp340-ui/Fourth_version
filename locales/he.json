@@ -140,6 +140,40 @@
     "coming_soon_badges": "תגי הישגים",
     "coming_soon_challenges": "אתגרים משפחתיים"
   },
+  "child_navigation": {
+    "tabs": {
+      "home": "בית",
+      "library": "גלריה",
+      "path": "מסע",
+      "profile": "פרופיל"
+    },
+    "home_screen": {
+      "title": "בסיס הבית",
+      "placeholder": "ברוכים הבאים לבסיס הבית שלך"
+    },
+    "library_screen": {
+      "title": "גלריית תרגילים",
+      "construction_title": "בבנייה",
+      "construction_message": "תוכן תרגילים מרגש בקרוב!"
+    },
+    "path_screen": {
+      "title": "המסע שלי",
+      "construction_title": "בבנייה",
+      "construction_message": "עקוב אחר ההתקדמות שלך בקרוב!"
+    }
+  },
+  "child_profile": {
+    "title": "פרופיל",
+    "sections": {
+      "settings": "הגדרות"
+    },
+    "language": {
+      "title": "שפה",
+      "current_hebrew": "עברית",
+      "current_english": "English"
+    },
+    "sign_out": "התנתק"
+  },
   "language": {
     "switch_language": "החלף שפה",
     "hebrew": "עברית",
@@ -158,6 +192,64 @@
       "strabismus": "פזילה (סטרביזמוס)",
       "other": "מצב אחר",
       "unknown": "טרם אובחן"
+    }
+  },
+  "settings": {
+    "sections": {
+      "family_management": "ניהול משפחה",
+      "general_settings": "הגדרות כלליות",
+      "support_info": "תמיכה ומידע"
+    },
+    "family": {
+      "loading": "טוען ילדים...",
+      "empty_title": "עדיין אין פרופילי ילדים",
+      "empty_subtitle": "הוסף ילד מהכרטיסייה הבית",
+      "status_active": "פעיל",
+      "status_frozen": "מוקפא"
+    },
+    "language": {
+      "title": "שפה",
+      "current_hebrew": "עברית",
+      "current_english": "English"
+    },
+    "support": {
+      "whatsapp_title": "תמיכה בווטסאפ",
+      "whatsapp_description": "קבל עזרה מהצוות שלנו",
+      "website_title": "בקר באתר",
+      "website_description": "למד עוד על Zoomi"
+    },
+    "footer": {
+      "sign_out": "התנתק",
+      "version": "גרסה 1.0.0"
+    },
+    "manage_child": {
+      "title": "נהל את {{childName}}",
+      "message": "בחר פעולה",
+      "freeze_subscription": "הקפא מנוי",
+      "activate_subscription": "הפעל מנוי",
+      "delete_profile": "מחק פרופיל",
+      "cancel": "ביטול"
+    },
+    "toggle_subscription": {
+      "success_title": "הצלחה",
+      "success_message_activated": "המנוי של {{childName}} הופעל.",
+      "success_message_frozen": "המנוי של {{childName}} הוקפא.",
+      "error_title": "שגיאה",
+      "error_message": "עדכון סטטוס המנוי נכשל. נסה שוב."
+    },
+    "delete_child": {
+      "confirm_title": "מחק פרופיל",
+      "confirm_message": "האם אתה בטוח שברצונך למחוק את הפרופיל של {{childName}}? לא ניתן לבטל פעולה זו.",
+      "confirm_button": "מחק",
+      "cancel_button": "ביטול",
+      "success_title": "הצלחה",
+      "success_message": "הפרופיל של {{childName}} נמחק.",
+      "error_title": "שגיאה",
+      "error_message": "מחיקת הפרופיל נכשלה. נסה שוב."
+    },
+    "errors": {
+      "whatsapp_not_installed": "לא ניתן לפתוח את ווטסאפ. ודא שהאפליקציה מותקנת.",
+      "website_failed": "לא ניתן לפתוח את האתר."
     }
   }
 }

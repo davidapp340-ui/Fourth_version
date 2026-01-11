@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, I18nManager, Alert, ActivityIndicator, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { Globe, LogOut, User, Settings as SettingsIcon, MessageCircle, Globe2, Freeze, Trash2 } from 'lucide-react-native';
+import { Globe, LogOut, Settings as SettingsIcon, MessageCircle, Globe2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/lib/database.types';
@@ -69,20 +69,20 @@ export default function SettingsScreen() {
     const isActive = child.subscription_status === 'active';
 
     Alert.alert(
-      `Manage ${child.name}`,
-      'Choose an action',
+      t('settings.manage_child.title', { childName: child.name }),
+      t('settings.manage_child.message'),
       [
         {
-          text: isActive ? 'Freeze Subscription' : 'Activate Subscription',
+          text: isActive ? t('settings.manage_child.freeze_subscription') : t('settings.manage_child.activate_subscription'),
           onPress: () => handleToggleSubscription(child),
         },
         {
-          text: 'Delete Profile',
+          text: t('settings.manage_child.delete_profile'),
           style: 'destructive',
           onPress: () => handleDeleteConfirmation(child),
         },
         {
-          text: 'Cancel',
+          text: t('settings.manage_child.cancel'),
           style: 'cancel',
         },
       ]
@@ -107,13 +107,20 @@ export default function SettingsScreen() {
         )
       );
 
+      const messageKey = newStatus === 'active'
+        ? 'settings.toggle_subscription.success_message_activated'
+        : 'settings.toggle_subscription.success_message_frozen';
+
       Alert.alert(
-        'Success',
-        `${child.name}'s subscription has been ${newStatus === 'active' ? 'activated' : 'frozen'}.`
+        t('settings.toggle_subscription.success_title'),
+        t(messageKey, { childName: child.name })
       );
     } catch (error) {
       console.error('Error toggling subscription:', error);
-      Alert.alert('Error', 'Failed to update subscription status. Please try again.');
+      Alert.alert(
+        t('settings.toggle_subscription.error_title'),
+        t('settings.toggle_subscription.error_message')
+      );
     } finally {
       setActionLoading(null);
     }
@@ -121,15 +128,15 @@ export default function SettingsScreen() {
 
   const handleDeleteConfirmation = (child: Child) => {
     Alert.alert(
-      'Delete Profile',
-      `Are you sure you want to delete ${child.name}'s profile? This action cannot be undone.`,
+      t('settings.delete_child.confirm_title'),
+      t('settings.delete_child.confirm_message', { childName: child.name }),
       [
         {
-          text: 'Cancel',
+          text: t('settings.delete_child.cancel_button'),
           style: 'cancel',
         },
         {
-          text: 'Delete',
+          text: t('settings.delete_child.confirm_button'),
           style: 'destructive',
           onPress: () => handleDeleteChild(child),
         },
@@ -149,10 +156,16 @@ export default function SettingsScreen() {
       if (error) throw error;
 
       setChildren(prevChildren => prevChildren.filter(c => c.id !== child.id));
-      Alert.alert('Success', `${child.name}'s profile has been deleted.`);
+      Alert.alert(
+        t('settings.delete_child.success_title'),
+        t('settings.delete_child.success_message', { childName: child.name })
+      );
     } catch (error) {
       console.error('Error deleting child:', error);
-      Alert.alert('Error', 'Failed to delete profile. Please try again.');
+      Alert.alert(
+        t('settings.delete_child.error_title'),
+        t('settings.delete_child.error_message')
+      );
     } finally {
       setActionLoading(null);
     }
@@ -163,14 +176,20 @@ export default function SettingsScreen() {
     const message = 'Hi, I need help with Zoomi Fitness';
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     Linking.openURL(url).catch(() => {
-      Alert.alert('Error', 'Could not open WhatsApp. Please make sure it is installed.');
+      Alert.alert(
+        t('settings.toggle_subscription.error_title'),
+        t('settings.errors.whatsapp_not_installed')
+      );
     });
   };
 
   const handleVisitWebsite = () => {
     const websiteUrl = 'https://zoomi.fitness';
     Linking.openURL(websiteUrl).catch(() => {
-      Alert.alert('Error', 'Could not open the website.');
+      Alert.alert(
+        t('settings.toggle_subscription.error_title'),
+        t('settings.errors.website_failed')
+      );
     });
   };
 
@@ -194,7 +213,7 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Family Management</Text>
+          <Text style={styles.sectionTitle}>{t('settings.sections.family_management')}</Text>
 
           {loading ? (
             <View style={styles.loadingCard}>
@@ -202,8 +221,8 @@ export default function SettingsScreen() {
             </View>
           ) : children.length === 0 ? (
             <View style={styles.emptyCard}>
-              <Text style={styles.emptyText}>No children profiles yet</Text>
-              <Text style={styles.emptySubtext}>Add a child from the Home tab</Text>
+              <Text style={styles.emptyText}>{t('settings.family.empty_title')}</Text>
+              <Text style={styles.emptySubtext}>{t('settings.family.empty_subtitle')}</Text>
             </View>
           ) : (
             <View style={styles.settingCard}>
@@ -236,7 +255,9 @@ export default function SettingsScreen() {
                                 : styles.statusTextInactive,
                             ]}
                           >
-                            {child.subscription_status === 'active' ? 'Active' : 'Frozen'}
+                            {child.subscription_status === 'active'
+                              ? t('settings.family.status_active')
+                              : t('settings.family.status_frozen')}
                           </Text>
                         </View>
                       </View>
@@ -260,16 +281,18 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>General Settings</Text>
+          <Text style={styles.sectionTitle}>{t('settings.sections.general_settings')}</Text>
 
           <View style={styles.settingCard}>
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
                 <Globe size={24} color="#4F46E5" />
                 <View style={styles.settingTextContainer}>
-                  <Text style={styles.settingLabel}>Language</Text>
+                  <Text style={styles.settingLabel}>{t('settings.language.title')}</Text>
                   <Text style={styles.settingDescription}>
-                    {i18n.language === 'he' ? 'Hebrew' : 'English'}
+                    {i18n.language === 'he'
+                      ? t('settings.language.current_hebrew')
+                      : t('settings.language.current_english')}
                   </Text>
                 </View>
               </View>
@@ -283,15 +306,15 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Support & Info</Text>
+          <Text style={styles.sectionTitle}>{t('settings.sections.support_info')}</Text>
 
           <View style={styles.settingCard}>
             <TouchableOpacity style={styles.settingRow} onPress={handleWhatsAppSupport}>
               <View style={styles.settingInfo}>
                 <MessageCircle size={24} color="#10B981" />
                 <View style={styles.settingTextContainer}>
-                  <Text style={styles.settingLabel}>WhatsApp Support</Text>
-                  <Text style={styles.settingDescription}>Get help from our team</Text>
+                  <Text style={styles.settingLabel}>{t('settings.support.whatsapp_title')}</Text>
+                  <Text style={styles.settingDescription}>{t('settings.support.whatsapp_description')}</Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -302,8 +325,8 @@ export default function SettingsScreen() {
               <View style={styles.settingInfo}>
                 <Globe2 size={24} color="#3B82F6" />
                 <View style={styles.settingTextContainer}>
-                  <Text style={styles.settingLabel}>Visit Website</Text>
-                  <Text style={styles.settingDescription}>Learn more about Zoomi</Text>
+                  <Text style={styles.settingLabel}>{t('settings.support.website_title')}</Text>
+                  <Text style={styles.settingDescription}>{t('settings.support.website_description')}</Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -313,10 +336,10 @@ export default function SettingsScreen() {
         <View style={styles.footer}>
           <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
             <LogOut size={24} color="#FFFFFF" />
-            <Text style={styles.signOutButtonText}>Sign Out</Text>
+            <Text style={styles.signOutButtonText}>{t('settings.footer.sign_out')}</Text>
           </TouchableOpacity>
 
-          <Text style={styles.versionText}>Version 1.0.0</Text>
+          <Text style={styles.versionText}>{t('settings.footer.version')}</Text>
         </View>
       </ScrollView>
     </View>
