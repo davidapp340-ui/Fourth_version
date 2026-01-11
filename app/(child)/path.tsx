@@ -1,22 +1,24 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { useChildSession } from '@/contexts/ChildSessionContext';
+import { Map } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 
-export default function ChildHomeScreen() {
-  const { child } = useChildSession();
+export default function PathScreen() {
   const { t } = useTranslation();
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>{t('child_home.title')}</Text>
-        <Text style={styles.subtitle}>{t('child_home.welcome', { childName: child?.name })}</Text>
+        <Text style={styles.title}>{t('child_navigation.path_screen.title')}</Text>
       </View>
 
       <View style={styles.content}>
-        <View style={styles.placeholderCard}>
-          <Text style={styles.placeholderText}>
-            {t('child_navigation.home_screen.placeholder')}
+        <View style={styles.constructionCard}>
+          <Map size={64} color="#10B981" />
+          <Text style={styles.constructionTitle}>
+            {t('child_navigation.path_screen.construction_title')}
+          </Text>
+          <Text style={styles.constructionMessage}>
+            {t('child_navigation.path_screen.construction_message')}
           </Text>
         </View>
       </View>
@@ -41,17 +43,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#10B981',
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#6B7280',
-    marginTop: 4,
-  },
   content: {
     flex: 1,
     padding: 20,
     justifyContent: 'center',
   },
-  placeholderCard: {
+  constructionCard: {
     backgroundColor: '#FFFFFF',
     padding: 48,
     borderRadius: 16,
@@ -62,10 +59,17 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
-  placeholderText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#10B981',
+  constructionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#111827',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  constructionMessage: {
+    fontSize: 16,
+    color: '#6B7280',
     textAlign: 'center',
+    lineHeight: 24,
   },
 });
