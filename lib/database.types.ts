@@ -58,6 +58,13 @@ export interface Database {
           linking_code_expires_at: string | null
           device_id: string | null
           created_at: string
+          birth_date: string | null
+          gender: string | null
+          vision_condition: string
+          wears_glasses: boolean
+          current_prescription_left: number | null
+          current_prescription_right: number | null
+          data_consent_at: string | null
         }
         Insert: {
           id?: string
@@ -67,6 +74,13 @@ export interface Database {
           linking_code_expires_at?: string | null
           device_id?: string | null
           created_at?: string
+          birth_date?: string | null
+          gender?: string | null
+          vision_condition?: string
+          wears_glasses?: boolean
+          current_prescription_left?: number | null
+          current_prescription_right?: number | null
+          data_consent_at?: string | null
         }
         Update: {
           id?: string
@@ -75,6 +89,42 @@ export interface Database {
           linking_code?: string | null
           linking_code_expires_at?: string | null
           device_id?: string | null
+          created_at?: string
+          birth_date?: string | null
+          gender?: string | null
+          vision_condition?: string
+          wears_glasses?: boolean
+          current_prescription_left?: number | null
+          current_prescription_right?: number | null
+          data_consent_at?: string | null
+        }
+      }
+      vision_history: {
+        Row: {
+          id: string
+          child_id: string
+          recorded_at: string
+          prescription_left: number | null
+          prescription_right: number | null
+          notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          child_id: string
+          recorded_at?: string
+          prescription_left?: number | null
+          prescription_right?: number | null
+          notes?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          child_id?: string
+          recorded_at?: string
+          prescription_left?: number | null
+          prescription_right?: number | null
+          notes?: string | null
           created_at?: string
         }
       }

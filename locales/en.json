@@ -46,6 +46,52 @@
     "empty_state_subtitle": "Tap the + button to add a child",
     "device_linked": "Device Linked",
     "link_button": "Link",
+    "add_child_wizard": {
+      "title": "Add Child Profile",
+      "step_indicator": "Step {{current}} of {{total}}",
+      "step1": {
+        "title": "Basic Information",
+        "name_label": "Child's Name",
+        "name_placeholder": "Enter name",
+        "birth_date_label": "Date of Birth",
+        "birth_date_placeholder": "Select date",
+        "gender_label": "Gender (Optional)",
+        "gender_placeholder": "Select gender",
+        "next_button": "Next",
+        "validation": {
+          "name_required": "Name is required",
+          "birth_date_required": "Date of birth is required",
+          "birth_date_future": "Date cannot be in the future"
+        }
+      },
+      "step2": {
+        "title": "Vision Profile & Consent",
+        "vision_section_title": "Vision Information",
+        "vision_condition_label": "Vision Status",
+        "vision_condition_placeholder": "Select condition",
+        "wears_glasses_label": "Wears Glasses?",
+        "prescription_section_title": "Current Prescription",
+        "prescription_left_label": "Left Eye",
+        "prescription_left_placeholder": "e.g., -2.50",
+        "prescription_right_label": "Right Eye",
+        "prescription_right_placeholder": "e.g., -1.75",
+        "consent_section_title": "Parent Consent",
+        "consent_text": "I confirm that I am the parent/legal guardian and agree to the",
+        "terms_link": "Terms of Use",
+        "create_button": "Create Profile",
+        "back_button": "Back",
+        "validation": {
+          "consent_required": "You must provide consent to continue",
+          "prescription_invalid": "Please enter a valid prescription number"
+        }
+      },
+      "errors": {
+        "creation_failed": "Failed to create profile. Please try again."
+      },
+      "success": {
+        "profile_created": "Profile created successfully!"
+      }
+    },
     "add_child_modal": {
       "title": "Add Child",
       "name_placeholder": "Child's Name",
@@ -94,5 +140,20 @@
     "switch_language": "Switch Language",
     "hebrew": "עברית",
     "english": "English"
+  },
+  "medical": {
+    "gender": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "vision_conditions": {
+      "myopia": "Myopia (Nearsightedness)",
+      "hyperopia": "Hyperopia (Farsightedness)",
+      "amblyopia": "Amblyopia (Lazy Eye)",
+      "strabismus": "Strabismus (Crossed Eyes)",
+      "other": "Other Condition",
+      "unknown": "Not Yet Diagnosed"
+    }
   }
 }
